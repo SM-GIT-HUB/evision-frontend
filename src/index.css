@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+html {
+    scroll-behavior: smooth;
+}
+
 input[type="datetime-local"]::-webkit-calendar-picker-indicator {
     filter: invert(1);
     cursor: pointer;
@@ -9,4 +13,10 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator {
     button {
         cursor: pointer;
     }
+}
+
+/* Custom selection */
+::selection {
+    background: rgba(139, 92, 246, 0.3);
+    color: white;
 }

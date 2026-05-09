@@ -6,8 +6,16 @@ import ResultsPage from "../pages/ResultsPage"
 import useAuthStore from "../store/auth-store"
 import EditExamPage from "../pages/EditExamPage"
 import CreateExamPage from "../pages/CreateExamPage"
+import CreateRoomPage from "../pages/CreateRoomPage"
 import ExamPage from "../features/exam/pages/ExamPage"
 import ExamFinishedPage from "../pages/ExamFinishedPage"
+
+// New Drive System
+import BrowseDrivesPage from "../pages/BrowseDrivesPage"
+import ApplyDrivePage from "../pages/ApplyDrivePage"
+import MyApplicationsPage from "../pages/MyApplicationsPage"
+import CreateDrivePage from "../pages/CreateDrivePage"
+
 import { BrowserRouter, Routes, Route } from "react-router-dom"
 
 function AppRoutes()
@@ -17,14 +25,28 @@ function AppRoutes()
     return (
         <BrowserRouter>
             <Routes>
+                {/* Root */}
                 <Route path="/" element={ isAuthenticated ? <HomePage /> : <LandingPage /> } />
-                <Route path="/login" element={<LoginPage />} />
+
+                {/* Auth */}
+                <Route path="/login"  element={<LoginPage />} />
                 <Route path="/signup" element={<SignupPage />} />
-                <Route path="/exam/create" element={<CreateExamPage/>} />
-                <Route path="/exam/results/:id" element={<ResultsPage/>} />
-                <Route path="/exam/edit/:id" element={<EditExamPage />} />
-                <Route path="/exam/:id" element={<ExamPage />} />
-                <Route path="/exam-finished" element={<ExamFinishedPage />} />
+
+                {/* Legacy Exam System */}
+                <Route path="/exam/create"        element={<CreateExamPage />} />
+                <Route path="/exam/results/:id"   element={<ResultsPage />} />
+                <Route path="/exam/edit/:id"      element={<EditExamPage />} />
+                <Route path="/exam/:id"           element={<ExamPage />} />
+                <Route path="/exam-finished"      element={<ExamFinishedPage />} />
+
+                {/* Room / Interview */}
+                <Route path="/room/create" element={<CreateRoomPage />} />
+
+                {/* ── NEW: Drive System ─────────────────────────── */}
+                <Route path="/drives"            element={<BrowseDrivesPage />} />
+                <Route path="/drive/create"      element={<CreateDrivePage />} />
+                <Route path="/apply/:driveId"    element={<ApplyDrivePage />} />
+                <Route path="/my-applications"   element={<MyApplicationsPage />} />
             </Routes>
         </BrowserRouter>
     )

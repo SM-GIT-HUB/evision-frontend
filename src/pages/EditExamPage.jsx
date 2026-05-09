@@ -268,95 +268,100 @@ function EditExamPage()
 
             <div className="max-w-5xl mx-auto">
 
-                <h1 className="text-5xl font-bold">
+                <button
+                    onClick={() => navigate("/")}
+                    className="flex items-center gap-2 text-zinc-400 hover:text-white text-sm mb-6 transition"
+                >
+                    ← Back to Dashboard
+                </button>
+
+                <h1 className="text-3xl font-bold mb-6">
                     Edit Exam
                 </h1>
 
-                <div className="flex gap-3 mt-10 flex-wrap">
+                <div className="flex gap-2 flex-wrap border-b border-zinc-800 pb-1 mb-8">
 
-                    {
-                        ["change-time", "add-candidates", "add-question"]
-                        .map(type => (
-
-                            <button
-                                key={type}
-                                onClick={() => setSelectedType(type)}
-                                className={`px-5 py-3 rounded-xl border transition ${
-                                    selectedType === type
-                                    ? "bg-white text-black border-white"
-                                    : "bg-zinc-900 border-zinc-800"
+                    {[
+                        { key: "change-time",     label: "📅 Change Schedule" },
+                        { key: "add-candidates",  label: "👥 Add Candidates" },
+                        { key: "add-question",    label: "❓ Add Questions" }
+                    ].map(({ key, label }) => (
+                        <button
+                            key={key}
+                            onClick={() => setSelectedType(key)}
+                            className={`px-4 py-2 rounded-t-lg text-sm font-medium border-b-2 -mb-px transition
+                                ${
+                                    selectedType === key
+                                    ? "border-white text-white"
+                                    : "border-transparent text-zinc-500 hover:text-zinc-300"
                                 }`}
-                            >
-                                {type}
-                            </button>
-                        ))
-                    }
+                        >
+                            {label}
+                        </button>
+                    ))}
 
                 </div>
 
                 {
                     selectedType === "change-time" &&
-                    <div className="mt-10 bg-zinc-950 border border-zinc-800 rounded-2xl p-8 space-y-5">
+                    <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-8 space-y-5">
+                        <h2 className="text-lg font-semibold mb-4">Update Schedule</h2>
 
-                        <input
-                            type="datetime-local"
-                            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none"
-                            value={timeData.startTime}
-                            onChange={(e) => setTimeData({
-                                ...timeData,
-                                startTime: e.target.value
-                            })}
-                        />
-
-                        <input
-                            type="datetime-local"
-                            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none"
-                            value={timeData.endTime}
-                            onChange={(e) => setTimeData({
-                                ...timeData,
-                                endTime: e.target.value
-                            })}
-                        />
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="text-xs text-zinc-400 uppercase tracking-wide block mb-2">New Start Time</label>
+                                <input
+                                    type="datetime-local"
+                                    className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none focus:border-zinc-600 transition"
+                                    value={timeData.startTime}
+                                    onChange={(e) => setTimeData({ ...timeData, startTime: e.target.value })}
+                                />
+                            </div>
+                            <div>
+                                <label className="text-xs text-zinc-400 uppercase tracking-wide block mb-2">New End Time</label>
+                                <input
+                                    type="datetime-local"
+                                    className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none focus:border-zinc-600 transition"
+                                    value={timeData.endTime}
+                                    onChange={(e) => setTimeData({ ...timeData, endTime: e.target.value })}
+                                />
+                            </div>
+                        </div>
 
                         <button
                             onClick={handleChangeTime}
                             disabled={loading}
-                            className="w-full bg-white text-black py-3 rounded-xl font-semibold"
+                            className="w-full bg-white text-black py-3 rounded-xl font-semibold hover:bg-zinc-200 transition disabled:opacity-60"
                         >
-                            {
-                                loading ? "Updating..." : "Update Schedule"
-                            }
+                            {loading ? "Updating..." : "Update Schedule"}
                         </button>
-
                     </div>
                 }
 
                 {
                     selectedType === "add-candidates" &&
-                    <div className="mt-10 bg-zinc-950 border border-zinc-800 rounded-2xl p-8">
+                    <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-8">
+                        <h2 className="text-lg font-semibold mb-4">Add New Candidates</h2>
 
                         <textarea
                             rows={6}
-                            placeholder="a@gmail.com, b@gmail.com"
-                            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none resize-none"
+                            placeholder="alice@example.com, bob@example.com"
+                            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none resize-none focus:border-zinc-600 transition"
                             value={candidateData}
                             onChange={(e) => setCandidateData(e.target.value)}
                         />
 
-                        <p className="text-zinc-500 text-sm mt-2">
-                            Enter emails separated by commas.
+                        <p className="text-zinc-500 text-xs mt-2">
+                            Existing candidates won't receive duplicate emails.
                         </p>
 
                         <button
                             onClick={handleAddCandidates}
                             disabled={loading}
-                            className="w-full bg-white text-black py-3 rounded-xl font-semibold mt-6"
+                            className="w-full bg-white text-black py-3 rounded-xl font-semibold mt-5 hover:bg-zinc-200 transition disabled:opacity-60"
                         >
-                            {
-                                loading ? "Adding..." : "Add Candidates"
-                            }
+                            {loading ? "Adding..." : "Add Candidates"}
                         </button>
-
                     </div>
                 }
 
