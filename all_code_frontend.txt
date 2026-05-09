@@ -1,0 +1,3595 @@
+
+
+========================================
+FILE: src\api\auth-api.js
+========================================
+
+import api from "./axios"
+
+export async function getMe()
+{
+    const response = await api.get("/auth/me");
+    return response.data;
+}
+
+export async function loginManual(data)
+{
+    const response = await api.post("/auth/login/manual", data);
+    return response.data;
+}
+
+export async function signupManual(data)
+{
+    const response = await api.post("/auth/signup/manual", data);
+    return response.data;
+}
+
+export async function verifySignup(data)
+{
+    const response = await api.post("/auth/signup/manual/verify", data);
+    return response.data;
+}
+
+export async function logout()
+{
+    const response =
+        await api.post("/auth/logout");
+
+    return response.data;
+}
+
+========================================
+FILE: src\api\axios.js
+========================================
+
+import axios from "axios"
+
+const api = axios.create({
+    baseURL: "http://localhost:3000/api/v1",
+    withCredentials: true
+})
+
+export default api
+
+========================================
+FILE: src\api\exam-api.js
+========================================
+
+import api from "./axios"
+
+export async function getExamDetails()
+{
+    const response = await api.get("/exam/details");
+    return response.data;
+}
+
+export async function createExam(data)
+{
+    const response = await api.post("/exam/create", data);
+    return response.data;
+}
+
+export async function getResults(examId)
+{
+    const response = await api.get(`/exam/results/${examId}`);
+    return response.data;
+}
+
+export async function editExam(examId, data)
+{
+    const response = await api.patch(`/exam/edit/${examId}`, data);
+    return response.data;
+}
+
+export async function getExam(examId)
+{
+    const response = await api.get(`/exam/${examId}`);
+    return response.data;
+}
+
+export async function submitExam(data)
+{
+    const response = await api.post(
+        "/exam/submit",
+        data
+    )
+
+    return response.data;
+}
+
+export async function saveAnswers(examId, data)
+{
+    const response = await api.post(
+        `/exam/save-answers/${examId}`,
+        data
+    )
+
+    return response.data;
+}
+
+========================================
+FILE: src\App.jsx
+========================================
+
+import { useEffect } from "react"
+import { getMe } from "./api/auth-api"
+import { Toaster } from "react-hot-toast"
+import AppRoutes from "./routes/AppRoutes"
+import useAuthStore from "./store/auth-store"
+import LoadingSpinner from "./components/LoadingSpinner"
+
+function App() {
+  const { user, loading, setUser } = useAuthStore();
+
+  useEffect(() => {
+      async function loadUser()
+      {
+          try {
+            const response = await getMe();
+            setUser(response.data);
+          }
+          catch(err) {
+            setUser(null);
+            console.log("Not authenticated: " + err.message);
+          }
+      }
+
+      loadUser();
+  }, [setUser])
+
+  console.log(user);
+
+  if (loading) {
+    return <LoadingSpinner />
+  }
+
+  return (
+    <>
+      <Toaster
+          position="top-center"
+          toastOptions={{
+              style: {
+                  background: "#18181b",
+                  color: "#fff",
+                  border: "1px solid #3f3f46"
+              }
+          }}
+      />
+
+      <AppRoutes />
+    </>
+  )
+}
+
+export default App
+
+========================================
+FILE: src\components\DashboardHeader.jsx
+========================================
+
+import toast from "react-hot-toast"
+import { logout } from "../api/auth-api"
+import { ShieldCheck } from "lucide-react"
+import { useNavigate } from "react-router-dom"
+import useAuthStore from "../store/auth-store"
+
+function DashboardHeader({ user, selectedTab, setSelectedTab })
+{
+    const navigate = useNavigate();
+    const { setUser } = useAuthStore();
+
+    async function handleLogout()
+    {
+        try {
+
+            await logout();
+
+            setUser(null);
+
+            toast.success("Logged out");
+
+            navigate("/login");
+        }
+        catch(err) {
+
+            toast.error(
+                err.response?.data?.message ||
+                "Logout failed"
+            )
+        }
+    }
+    
+    return (
+        <div className="flex flex-col gap-8">
+            
+            <div>
+                <div className="w-full flex justify-between">
+                    <h1 className="text-4xl font-bold flex items-center gap-2">
+                        <ShieldCheck size={38} />
+                        EVision
+                    </h1>
+
+                    <button
+                        onClick={handleLogout}
+                        className="
+                            bg-red-500 hover:bg-red-600
+                            px-5 py-2.5 rounded-xl transition
+                        "
+                    >
+                        Logout
+                    </button>
+                </div>
+
+                <p className="mt-4 text-zinc-400 text-lg">
+                    Welcome back, {user.name}
+                </p>
+
+                <p className="mt-2 text-zinc-500">
+                    Role: <span className="text-white capitalize">{user.role}</span>
+                </p>
+            </div>
+
+            <div className="flex gap-3 flex-wrap">
+
+                <button
+                    onClick={() => setSelectedTab("upcoming")}
+                    className={`px-5 py-2.5 rounded-xl border transition
+                    ${
+                        selectedTab === "upcoming"
+                        ? "bg-white text-black border-white"
+                        : "bg-zinc-900 border-zinc-800 hover:border-zinc-700"
+                    }`}
+                >
+                    Upcoming Exams
+                </button>
+
+                <button
+                    onClick={() => setSelectedTab("past")}
+                    className={`px-5 py-2.5 rounded-xl border transition
+                    ${
+                        selectedTab === "past"
+                        ? "bg-white text-black border-white"
+                        : "bg-zinc-900 border-zinc-800 hover:border-zinc-700"
+                    }`}
+                >
+                    Past Exams
+                </button>
+
+                {
+                    user.role === "examiner" &&
+                    <button
+                        onClick={() => navigate("/exam/create")}
+                        className="bg-zinc-900 border border-zinc-800 px-5 py-2.5 rounded-xl hover:border-zinc-700 transition"
+                    >
+                        Create Exam
+                    </button>
+                }
+
+            </div>
+
+        </div>
+    )
+}
+
+export default DashboardHeader
+
+========================================
+FILE: src\components\ExamCard.jsx
+========================================
+
+import { useState } from "react"
+import toast from "react-hot-toast"
+import { AlertTriangle } from "lucide-react"
+import { useNavigate } from "react-router-dom"
+
+function ExamCard({ exam, type, role })
+{
+    const navigate = useNavigate();
+
+    const [showRules, setShowRules] = useState(false);
+
+    async function handleStartExam()
+    {
+        const now = Date.now();
+        const startTime = new Date(exam.startTime).getTime();
+
+        if (now < startTime) {
+            return toast.error("Exam has not started yet", { id: "t" });
+        }
+
+        try {
+
+            //
+            // STEP 1 -> ask camera permission first
+            //
+            const stream =
+                await navigator.mediaDevices.getUserMedia({
+                    video: true,
+                    audio: false
+                });
+
+            //
+            // stop temporary permission stream immediately
+            //
+            stream.getTracks().forEach(track => track.stop());
+
+            //
+            // STEP 2 -> fullscreen
+            //
+            if (!document.fullscreenElement) {
+                await document.documentElement.requestFullscreen();
+            }
+
+            //
+            // STEP 3 -> start exam
+            //
+            navigate(`/exam/${exam._id}`);
+        }
+        catch(err) {
+
+            console.log(err);
+
+            toast.error(
+                "Camera and fullscreen permissions are required"
+            )
+        }
+    }
+
+    return (
+        <>
+            <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-5 hover:border-zinc-700 transition">
+
+                <h2 className="text-xl font-semibold">
+                    {exam.title}
+                </h2>
+
+                <div className="mt-4 space-y-1 text-sm text-zinc-400">
+
+                    <p>
+                        Start: {new Date(exam.startTime).toLocaleString()}
+                    </p>
+
+                    <p>
+                        End: {new Date(exam.endTime).toLocaleString()}
+                    </p>
+                </div>
+
+                {
+                    role === "student" && type === "past" &&
+                    <p className="mt-6 text-lg">
+                        Score: <span className="font-semibold text-white">
+                            {exam.score} / {exam.fullMarks}
+                        </span>
+                    </p>
+                }
+
+                <div className="mt-5">
+
+                    {
+                        role === "student" && type === "upcoming" &&
+                        <button
+                            onClick={() => setShowRules(true)}
+                            className="
+                                bg-white text-black px-5 py-3 rounded-xl
+                                font-semibold hover:bg-zinc-200 transition
+                            "
+                        >
+                            Start Exam
+                        </button>
+                    }
+
+                    {
+                        role === "examiner" && type === "upcoming" &&
+                        <button
+                            onClick={() => {
+
+                                const now = Date.now();
+
+                                const endTime =
+                                    new Date(exam.endTime).getTime();
+
+                                if (now >= endTime)
+                                {
+                                    return toast.error(
+                                        "Cannot edit completed exam"
+                                    )
+                                }
+
+                                navigate(`/exam/edit/${exam._id}`);
+                            }}
+                            className="bg-white text-black px-4 py-2 rounded-lg font-medium hover:bg-zinc-200 transition"
+                        >
+                            Edit Exam
+                        </button>
+                    }
+
+                    {
+                        role === "examiner" && type === "past" &&
+                        <button
+                            onClick={() => navigate(`/exam/results/${exam._id}`)}
+                            className="bg-white text-black px-5 py-3 rounded-xl font-semibold hover:bg-zinc-200 transition"
+                        >
+                            See Results
+                        </button>
+                    }
+
+                </div>
+
+            </div>
+
+            {
+                showRules &&
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center px-6">
+
+                    <div className="
+                        w-full max-w-2xl
+                        bg-zinc-950 border border-zinc-800
+                        rounded-3xl p-8
+                    ">
+
+                        <div className="flex items-center gap-3">
+                            <div className="bg-red-500/20 p-3 rounded-2xl">
+                                <AlertTriangle className="text-red-400" size={28} />
+                            </div>
+
+                            <div>
+                                <h2 className="text-3xl font-bold">
+                                    Exam Instructions
+                                </h2>
+
+                                <p className="text-zinc-400 mt-1">
+                                    Please read all rules carefully before starting.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="mt-8 space-y-4 text-zinc-300 leading-relaxed">
+
+                            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4">
+                                • Do not exit fullscreen mode during the examination.
+                            </div>
+
+                            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4">
+                                • Do not switch tabs, minimize the browser, or open other applications.
+                            </div>
+
+                            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4">
+                                • Sit in a well-lit environment and remain visible during monitoring.
+                            </div>
+
+                            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4">
+                                • Refreshing, closing, or leaving the exam may automatically submit your test.
+                            </div>
+
+                            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4">
+                                • Once the exam is started or closed or submitted, it cannot be started again.
+                            </div>
+
+                            <div className="bg-red-500/10 border border-red-500/30 rounded-2xl p-4 text-red-300">
+                                • Frequent violations may result in automatic submission of your exam.
+                            </div>
+
+                        </div>
+
+                        <div className="flex gap-4 mt-8">
+
+                            <button
+                                onClick={() => setShowRules(false)}
+                                className="
+                                    flex-1 border border-zinc-700
+                                    py-3 rounded-2xl hover:bg-zinc-900 transition
+                                "
+                            >
+                                Cancel
+                            </button>
+
+                            <button
+                                onClick={handleStartExam}
+                                className="
+                                    flex-1 bg-white text-black
+                                    py-3 rounded-2xl font-semibold
+                                    hover:bg-zinc-200 transition
+                                "
+                            >
+                                I Understand & Start Exam
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            }
+        </>
+    )
+}
+
+export default ExamCard
+
+========================================
+FILE: src\components\ExamSection.jsx
+========================================
+
+import ExamCard from "./ExamCard"
+
+function ExamSection({ title, exams, type, role })
+{
+    return (
+        <section className="mt-16">
+
+            <h2 className="text-3xl font-bold">
+                {title}
+            </h2>
+
+            {
+                exams.length === 0 &&
+                <p className="mt-6 text-zinc-500">
+                    No exams found
+                </p>
+            }
+
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 mt-6">
+
+                {
+                    exams.map((exam) => (
+                        <ExamCard
+                            key={exam._id}
+                            exam={exam}
+                            type={type}
+                            role={role}
+                        />
+                    ))
+                }
+
+            </div>
+
+        </section>
+    )
+}
+
+export default ExamSection
+
+========================================
+FILE: src\components\LoadingSpinner.jsx
+========================================
+
+
+function LoadingSpinner()
+{
+    return (
+        <div className="min-h-screen bg-black flex items-center justify-center">
+
+            <div className="w-14 h-14 border-4 border-zinc-700 border-t-white rounded-full animate-spin" />
+
+        </div>
+    )
+}
+
+export default LoadingSpinner
+
+========================================
+FILE: src\features\exam\components\QuestionNavigation.jsx
+========================================
+
+
+function QuestionNavigation({
+    questions,
+    currentQuestionIndex,
+    setCurrentQuestionIndex,
+    answers
+})
+{
+    return (
+        <div className="flex gap-3 flex-wrap">
+
+            {
+                questions.map((question, index) => {
+
+                    const answered =
+                        answers[question._id]?.response !== undefined &&
+                        answers[question._id]?.response !== "";
+
+                    return (
+                        <button
+                            key={question._id}
+                            onClick={() => setCurrentQuestionIndex(index)}
+                            className={`
+                                w-12 h-12 rounded-xl border transition
+                                ${currentQuestionIndex === index
+                                    ? "bg-white text-black border-white"
+                                    : answered
+                                        ? "bg-zinc-800 border-zinc-700"
+                                        : "bg-zinc-950 border-zinc-800"
+                                }
+                            `}
+                        >
+                            {index + 1}
+                        </button>
+                    )
+                })
+            }
+
+        </div>
+    )
+}
+
+export default QuestionNavigation
+
+========================================
+FILE: src\features\exam\components\QuestionRenderer.jsx
+========================================
+
+import Editor from "@monaco-editor/react"
+
+function QuestionRenderer({ question, value, onChange })
+{
+    if (!question) {
+        return null;
+    }
+
+    //
+    // MCQ
+    //
+    if (question.type === "mcq")
+    {
+        return (
+            <div>
+
+                <h2 className="text-2xl font-semibold leading-relaxed">
+                    {question.questionText}
+                </h2>
+
+                <div className="mt-8 space-y-4">
+
+                    {
+                        question.options.map((option, idx) => (
+
+                            <label
+                                key={idx}
+                                className={`
+                                    flex items-center gap-4
+                                    border rounded-2xl p-5 cursor-pointer transition
+                                    ${Number(value) === idx
+                                        ? "border-white bg-zinc-900"
+                                        : "border-zinc-800 bg-zinc-950"
+                                    }
+                                `}
+                            >
+
+                                <input
+                                    type="radio"
+                                    checked={Number(value) === idx}
+                                    onChange={() => onChange(idx)}
+                                />
+
+                                <span>
+                                    {option}
+                                </span>
+
+                            </label>
+                        ))
+                    }
+
+                </div>
+
+            </div>
+        )
+    }
+
+    //
+    // THEORY
+    //
+    if (question.type === "theory")
+    {
+        return (
+            <div>
+
+                <h2 className="text-2xl font-semibold leading-relaxed">
+                    {question.questionText}
+                </h2>
+
+                <textarea
+                    rows={10}
+                    value={value || ""}
+                    onChange={(e) => onChange(e.target.value)}
+                    placeholder="Write your answer here..."
+                    className="
+                        mt-8 w-full bg-zinc-950 border border-zinc-800
+                        rounded-2xl p-5 outline-none resize-none overflow-y-auto
+                    "
+                />
+
+            </div>
+        )
+    }
+
+    //
+    // CODING
+    //
+    return (
+        <div>
+            <h2 className="text-2xl font-semibold leading-relaxed">
+                {question.questionText}
+            </h2>
+
+            <div className="
+                mt-8 overflow-hidden
+                border border-zinc-800 rounded-2xl
+            ">
+
+                <Editor
+                    height="500px"
+                    defaultLanguage="cpp"
+                    theme="vs-dark"
+                    value={value || ""}
+                    onChange={(val) => onChange(val || "")}
+                    options={{
+                        minimap: {
+                            enabled: false
+                        },
+
+                        fontSize: 14,
+
+                        wordWrap: "on",
+
+                        scrollBeyondLastLine: false,
+
+                        automaticLayout: true,
+
+                        quickSuggestions: false,
+
+                        suggestOnTriggerCharacters: false,
+
+                        parameterHints: {
+                            enabled: false
+                        },
+
+                        hover: {
+                            enabled: false
+                        },
+
+                        contextmenu: false,
+
+                        folding: false,
+
+                        glyphMargin: false,
+
+                        lineNumbersMinChars: 3,
+
+                        renderLineHighlight: "none",
+
+                        occurrencesHighlight: "off",
+
+                        selectionHighlight: false,
+
+                        codeLens: false,
+
+                        links: false,
+
+                        matchBrackets: "always",
+
+                        autoClosingBrackets: "always",
+
+                        autoClosingQuotes: "always",
+
+                        autoIndent: "advanced",
+
+                        formatOnPaste: false,
+
+                        formatOnType: false
+                    }}
+                />
+
+            </div>
+
+        </div>
+    )
+}
+
+export default QuestionRenderer;
+
+========================================
+FILE: src\features\exam\components\Timer.jsx
+========================================
+
+
+function formatTime(ms)
+{
+    const totalSeconds = Math.floor(ms / 1000);
+
+    const hours =
+        String(Math.floor(totalSeconds / 3600)).padStart(2, "0");
+
+    const minutes =
+        String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, "0");
+
+    const seconds =
+        String(totalSeconds % 60).padStart(2, "0");
+
+    return `${hours}:${minutes}:${seconds}`;
+}
+
+function Timer({ timeLeft })
+{
+    return (
+        <div className="bg-zinc-950 border border-zinc-800 rounded-2xl px-5 py-3">
+            <p className="text-sm text-zinc-500">
+                Time Left
+            </p>
+
+            <h2 className="text-2xl font-bold mt-1">
+                {formatTime(timeLeft)}
+            </h2>
+        </div>
+    )
+}
+
+export default Timer
+
+========================================
+FILE: src\features\exam\hooks\useAutosave.js
+========================================
+
+import toast from "react-hot-toast"
+import { useEffect, useRef } from "react"
+
+import { saveAnswers } from "../../../api/exam-api"
+
+import { formatAnswersForSubmission } from "../utils/format-answers"
+
+function useAutosave({ exam, examId, answers })
+{
+    const savingRef = useRef(false);
+
+    useEffect(() => {
+        if (!exam || !answers) {
+            return;
+        }
+
+        const start =
+            new Date(exam.startTime).getTime();
+
+        const end =
+            new Date(exam.endTime).getTime();
+
+        const totalDuration =
+            end - start;
+
+        const interval = Math.min(5 * 60 * 1000, totalDuration / 12);
+
+        async function autosave()
+        {
+            try {
+                if (savingRef.current) {
+                    return;
+                }
+
+                savingRef.current = true;
+
+                const formattedAnswers =
+                    formatAnswersForSubmission(answers);
+
+                if (formattedAnswers.length === 0) {
+                    return;
+                }
+
+                await saveAnswers(examId, {
+                    examId,
+                    answers: formattedAnswers
+                })
+
+            }
+            catch(err) {
+                toast.error(
+                    err.response?.data?.message ||
+                    "Autosave failed"
+                )
+            }
+            finally {
+                savingRef.current = false;
+            }
+        }
+
+        const timer =
+            setInterval(autosave, interval);
+
+        return () => clearInterval(timer);
+
+    }, [exam, examId, answers])
+}
+
+export default useAutosave;
+
+========================================
+FILE: src\features\exam\hooks\useBeforeUnload.js
+========================================
+
+import { useEffect } from "react";
+
+function useBeforeUnload(enabled = true)
+{
+    useEffect(() => {
+        if (!enabled) {
+            return;
+        }
+
+        function handleBeforeUnload(e)
+        {
+            e.preventDefault();
+
+            e.returnValue =
+                "Refreshing will automatically submit your exam.";
+
+            return e.returnValue;
+        }
+
+        window.addEventListener(
+            "beforeunload",
+            handleBeforeUnload
+        )
+
+        return () => {
+            window.removeEventListener(
+                "beforeunload",
+                handleBeforeUnload
+            )
+        }
+
+    }, [enabled])
+}
+
+export default useBeforeUnload;
+
+========================================
+FILE: src\features\exam\hooks\useCamera.js
+========================================
+
+/* eslint-disable react-hooks/exhaustive-deps */
+import { useEffect, useRef, useState } from "react"
+
+function useCamera({ enabled, onCameraDisconnected })
+{
+    const videoRef = useRef(null);
+
+    const streamRef = useRef(null);
+
+    const [cameraError, setCameraError] = useState("");
+
+    useEffect(() => {
+
+        if (!enabled) {
+            return;
+        }
+
+        let mounted = true;
+
+        async function startCamera()
+        {
+            //
+            // prevent duplicate streams
+            //
+
+            try {
+                if (streamRef.current)
+                {
+                    streamRef.current
+                        .getTracks()
+                        .forEach(track => track.stop());
+
+                    streamRef.current = null;
+                }
+
+                const stream =
+                    await navigator.mediaDevices.getUserMedia({
+                        video: true,
+                        audio: false
+                    })
+
+                if (!mounted)
+                {
+                    stream.getTracks().forEach(track => track.stop());
+                    return;
+                }
+
+                streamRef.current = stream;
+
+                //
+                // detect camera disconnect
+                //
+                stream.getVideoTracks().forEach(track => {
+
+                    track.onended = () => {
+
+                        streamRef.current = null;
+
+                        if (onCameraDisconnected)
+                        {
+                            onCameraDisconnected();
+                        }
+                    }
+                })
+
+                if (videoRef.current)
+                {
+                    videoRef.current.srcObject = stream;
+
+                    videoRef.current.onloadedmetadata = async () => {
+                        try {
+                            await videoRef.current.play();
+                        }
+                        catch(err) {
+                            console.log(err);
+                        }
+                    }
+                }
+            }
+            catch {
+                setCameraError("Camera permission denied");
+            }
+        }
+
+        startCamera();
+
+        return () => {
+            mounted = false;
+        }
+
+    }, [enabled])
+
+    //
+    // ACTUAL cleanup only on unmount
+    //
+    useEffect(() => {
+
+        return () => {
+
+            if (streamRef.current)
+            {
+                streamRef.current
+                    .getTracks()
+                    .forEach(track => track.stop());
+
+                streamRef.current = null;
+            }
+        }
+
+    }, [])
+
+    return {
+        videoRef,
+        cameraError
+    }
+}
+
+export default useCamera
+
+========================================
+FILE: src\features\exam\hooks\useExamAnswers.js
+========================================
+
+import { useState } from "react";
+
+import {
+    loadAnswers,
+    saveAnswers
+} from "../utils/exam-storage";
+
+function useExamAnswers(examId)
+{
+    const [answers, setAnswers] = useState(() => {
+        return loadAnswers(examId);
+    });
+
+    function updateAnswer(questionId, response)
+    {
+        setAnswers(prev => {
+
+            const updated = {
+                ...prev,
+                [questionId]: {
+                    questionId,
+                    response
+                }
+            };
+
+            saveAnswers(examId, updated);
+
+            return updated;
+        })
+    }
+
+    return {
+        answers,
+        updateAnswer
+    }
+}
+
+export default useExamAnswers;
+
+========================================
+FILE: src\features\exam\hooks\useExamTimer.js
+========================================
+
+import { useEffect, useState } from "react"
+
+function useExamTimer(endTime, onExpire)
+{
+    const [timeLeft, setTimeLeft] = useState(0);
+
+    useEffect(() => {
+
+        if (!endTime) {
+            return;
+        }
+
+        function updateTimer()
+        {
+            const remaining =
+                new Date(endTime).getTime() - Date.now();
+
+            if (remaining <= 0)
+            {
+                setTimeLeft(0);
+
+                if (onExpire) {
+                    onExpire();
+                }
+
+                return;
+            }
+
+            setTimeLeft(remaining);
+        }
+
+        updateTimer();
+
+        const interval =
+            setInterval(updateTimer, 1000);
+
+        return () => clearInterval(interval);
+
+    }, [endTime, onExpire]);
+
+    return timeLeft;
+}
+
+export default useExamTimer
+
+========================================
+FILE: src\features\exam\hooks\useFaceMonitoring.js
+========================================
+
+/* eslint-disable react-hooks/exhaustive-deps */
+import * as faceapi from "face-api.js"
+
+import { useEffect, useRef } from "react"
+
+function useFaceMonitoring({
+    enabled,
+    videoRef,
+    onViolation
+})
+{
+    const intervalRef = useRef(null);
+
+    const modelsLoadedRef = useRef(false);
+
+    const violationLockRef = useRef(false);
+
+    const missingFaceCountRef = useRef(0);
+    const faceAwayCountRef = useRef(0);
+
+    useEffect(() => {
+
+        if (!enabled) {
+            return;
+        }
+
+        let mounted = true;
+
+        async function loadModels()
+        {
+            //
+            // prevent reloading models
+            //
+            if (modelsLoadedRef.current) {
+                return;
+            }
+
+            await Promise.all([
+                faceapi.nets.tinyFaceDetector.loadFromUri("/models"),
+                faceapi.nets.faceLandmark68Net.loadFromUri("/models")
+            ])
+
+            modelsLoadedRef.current = true;
+        }
+
+        async function detectFaces()
+        {
+            try {
+
+                const video = videoRef.current;
+
+                if (
+                    !video ||
+                    video.readyState !== 4
+                ) {
+                    return;
+                }
+
+                const detections =
+                    await faceapi
+                        .detectAllFaces(
+                            video,
+                            new faceapi.TinyFaceDetectorOptions({
+                                inputSize: 224,
+                                scoreThreshold: 0.5
+                            })
+                        )
+                        .withFaceLandmarks();
+
+                //
+                // NO FACE
+                //
+                if (detections.length === 0)
+                {
+                    missingFaceCountRef.current++;
+
+                    if (missingFaceCountRef.current >= 3)
+                    {
+                        triggerViolation();
+                        missingFaceCountRef.current = 0;
+                    }
+
+                    return;
+                }
+
+                missingFaceCountRef.current = 0;
+
+                //
+                // MULTIPLE FACES
+                //
+                if (detections.length > 1)
+                {
+                    missingFaceCountRef.current++;
+
+                    if (missingFaceCountRef.current >= 2)
+                    {
+                        triggerViolation();
+                        missingFaceCountRef.current = 0;
+                    }
+
+                    return;
+                }
+
+                const detection = detections[0];
+
+                const landmarks = detection.landmarks;
+
+                const nose = landmarks.getNose();
+
+                const jaw = landmarks.getJawOutline();
+
+                const leftJaw = jaw[0];
+
+                const rightJaw = jaw[16];
+
+                const faceCenterX =
+                    (leftJaw.x + rightJaw.x) / 2;
+
+                const noseTip = nose[6];
+
+                //
+                // LOOKING AWAY
+                //
+                const faceWidth =
+                Math.abs(rightJaw.x - leftJaw.x);
+
+                const deviation =
+                    Math.abs(noseTip.x - faceCenterX);
+
+                const normalizedDeviation =
+                    deviation / faceWidth;
+
+                if (normalizedDeviation > 0.32)
+                {
+                    faceAwayCountRef.current++;
+
+                    if (faceAwayCountRef.current >= 3)
+                    {
+                        triggerViolation();
+                        faceAwayCountRef.current = 0;
+                    }
+                }
+                else
+                {
+                    faceAwayCountRef.current = 0;
+                }
+
+            }
+            catch(err) {
+                console.log(err);
+            }
+        }
+
+        function triggerViolation()
+        {
+            if (violationLockRef.current) {
+                return;
+            }
+
+            violationLockRef.current = true;
+
+            onViolation();
+
+            setTimeout(() => {
+                violationLockRef.current = false;
+            }, 5000);
+        }
+
+        async function initialize()
+        {
+            await loadModels();
+
+            if (!mounted) {
+                return;
+            }
+
+            //
+            // wait until video becomes ready
+            //
+            const waitForVideo = setInterval(() => {
+
+                const video = videoRef.current;
+
+                if (
+                    video &&
+                    video.readyState === 4
+                )
+                {
+                    clearInterval(waitForVideo);
+
+                    intervalRef.current =
+                        setInterval(detectFaces, 3000);
+                }
+
+            }, 500);
+
+        }
+
+        initialize();
+
+        return () => {
+
+            mounted = false;
+
+            if (intervalRef.current)
+            {
+                clearInterval(intervalRef.current);
+            }
+        }
+
+    }, [enabled])
+}
+
+export default useFaceMonitoring
+
+========================================
+FILE: src\features\exam\hooks\useFocusMonitor.js
+========================================
+
+/* eslint-disable react-hooks/exhaustive-deps */
+import { useEffect, useRef } from "react"
+
+function useFocusMonitor({ enabled, onViolation }) {
+    const intervalRef = useRef(null);
+
+    useEffect(() => {
+        if (!enabled) return;
+
+        const startViolationInterval = () => {
+            if (!intervalRef.current) {
+                intervalRef.current = setInterval(() => {
+                    if (!document.hasFocus()) {
+                        onViolation();
+                    } else {
+                        stopViolationInterval();
+                    }
+                }, 3000);
+            }
+        };
+
+        const stopViolationInterval = () => {
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+                intervalRef.current = null;
+            }
+        };
+
+        const handleBlur = () => startViolationInterval();
+        const handleFocus = () => stopViolationInterval();
+
+        window.addEventListener("blur", handleBlur);
+        window.addEventListener("focus", handleFocus);
+
+        // Check initial state
+        if (!document.hasFocus()) startViolationInterval();
+
+        return () => {
+            window.removeEventListener("blur", handleBlur);
+            window.removeEventListener("focus", handleFocus);
+            stopViolationInterval();
+        };
+    }, [enabled]);
+}
+
+export default useFocusMonitor
+
+========================================
+FILE: src\features\exam\hooks\useFullscreen.js
+========================================
+
+/* eslint-disable react-hooks/exhaustive-deps */
+// import toast from "react-hot-toast"
+import { useEffect, useRef } from "react"
+
+function useFullscreen({ enabled, onViolation }) {
+    const intervalRef = useRef(null);
+
+    useEffect(() => {
+        if (!enabled) return;
+
+        const startViolationInterval = () => {
+            if (!intervalRef.current) {
+                // Initial check after 3 seconds, then repeats every 3 seconds
+                intervalRef.current = setInterval(() => {
+                    if (!document.fullscreenElement) {
+                        onViolation();
+                    } else {
+                        stopViolationInterval();
+                    }
+                }, 3000)
+            }
+        };
+
+        const stopViolationInterval = () => {
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+                intervalRef.current = null;
+            }
+        };
+
+        const handleFullscreenChange = () => {
+            if (!document.fullscreenElement) {
+                startViolationInterval();
+            } else {
+                stopViolationInterval();
+            }
+        };
+
+        document.addEventListener("fullscreenchange", handleFullscreenChange);
+        
+        // Check initial state
+        if (!document.fullscreenElement) startViolationInterval();
+
+        return () => {
+            document.removeEventListener("fullscreenchange", handleFullscreenChange);
+            stopViolationInterval();
+        };
+    }, [enabled])
+}
+
+export default useFullscreen
+
+========================================
+FILE: src\features\exam\hooks\useRefreshSubmit.js
+========================================
+
+import { useEffect } from "react"
+
+function useRefreshSubmit({ enabled, submitExam })
+{
+    useEffect(() => {
+        if (!enabled) {
+            return;
+        }
+
+        function handleUnload()
+        {
+            submitExam({
+                silent: true,
+                showError: false
+            });
+        }
+
+        window.addEventListener(
+            "unload",
+            handleUnload
+        )
+
+        return () => {
+            window.removeEventListener(
+                "unload",
+                handleUnload
+            )
+        }
+
+    }, [enabled, submitExam])
+}
+
+export default useRefreshSubmit
+
+========================================
+FILE: src\features\exam\hooks\useVisibilityMonitor.js
+========================================
+
+import { useEffect } from "react"
+
+function useVisibilityMonitor({ enabled, onHidden })
+{
+    useEffect(() => {
+
+        if (!enabled) {
+            return;
+        }
+
+        function handleVisibility()
+        {
+            if (document.hidden)
+            {
+                onHidden();
+            }
+        }
+
+        document.addEventListener(
+            "visibilitychange",
+            handleVisibility
+        )
+
+        return () => {
+            document.removeEventListener(
+                "visibilitychange",
+                handleVisibility
+            )
+        }
+
+    }, [enabled, onHidden])
+}
+
+export default useVisibilityMonitor
+
+========================================
+FILE: src\features\exam\pages\ExamPage.jsx
+========================================
+
+import toast from "react-hot-toast"
+import useCamera from "../hooks/useCamera"
+import useFaceMonitoring from "../hooks/useFaceMonitoring"
+
+import { useEffect, useState, useCallback } from "react"
+import { Navigate, useParams, useNavigate } from "react-router-dom"
+
+import { getExam, submitExam } from "../../../api/exam-api"
+
+import { clearAnswers } from "../utils/exam-storage"
+
+import { formatAnswersForSubmission } from "../utils/format-answers"
+
+import useAuthStore from "../../../store/auth-store"
+
+import LoadingSpinner from "../../../components/LoadingSpinner"
+
+import Timer from "../components/Timer"
+import useExamTimer from "../hooks/useExamTimer"
+import useExamAnswers from "../hooks/useExamAnswers"
+import QuestionRenderer from "../components/QuestionRenderer"
+import QuestionNavigation from "../components/QuestionNavigation"
+
+import useAutosave from "../hooks/useAutosave"
+import useBeforeUnload from "../hooks/useBeforeUnload"
+import useRefreshSubmit from "../hooks/useRefreshSubmit"
+
+import useFullscreen from "../hooks/useFullscreen"
+import useFocusMonitor from "../hooks/useFocusMonitor"
+
+function ExamPage()
+{
+    const { id } = useParams();
+
+    const navigate = useNavigate();
+
+    const [submitting, setSubmitting] = useState(false);
+    const [showSubmitConfirm, setShowSubmitConfirm] = useState(false);
+    const [submitted, setSubmitted] = useState(false);
+
+    const [violations, setViolations] = useState({
+        fullscreen: 3,
+        focus: 5,
+        camera: 5
+    })
+
+    const { isAuthenticated } = useAuthStore();
+
+    const [loading, setLoading] = useState(true);
+
+    const [exam, setExam] = useState();
+
+    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+
+    const {
+        answers,
+        updateAnswer
+    } = useExamAnswers(id);
+
+    useEffect(() => {
+        let mounted = true;
+
+        async function fetchExam()
+        {
+            try {
+                const response = await getExam(id);
+
+                if (mounted) {
+                    setExam(response.data);
+                }
+            }
+            catch(err) {
+                toast.error(
+                    err.response?.data?.message ||
+                    "Failed to fetch exam"
+                )
+            }
+            finally {
+                if (mounted) {
+                    setLoading(false);
+                }
+            }
+        }
+
+        fetchExam();
+
+        return () => {
+            mounted = false;
+        }
+
+    }, [id])
+
+    const handleSubmitExam = useCallback(async ({
+        silent = false,
+        showError = true
+    } = {}) =>
+    {
+        try {
+
+            if (submitted || submitting) {
+                return;
+            }
+
+            setSubmitting(true);
+
+            const formattedAnswers =
+                formatAnswersForSubmission(answers);
+
+            await submitExam({
+                examId: id,
+                answers: formattedAnswers
+            })
+
+            setSubmitted(true);
+
+            clearAnswers(id);
+
+            if (!silent)
+            {
+                toast.success("Exam submitted");
+
+                navigate("/exam-finished", {
+                    replace: true
+                })
+            }
+        }
+        catch(err) {
+
+            if (showError)
+            {
+                toast.error(
+                    err.response?.data?.message ||
+                    err.response?.data?.error?.message ||
+                    "Failed to submit exam"
+                )
+            }
+        }
+        finally {
+            setSubmitting(false);
+        }
+
+    }, [
+        submitted,
+        submitting,
+        answers,
+        id,
+        navigate
+    ])
+
+    const timeLeft = useExamTimer(
+        exam?.endTime,
+        handleSubmitExam
+    )
+
+    useAutosave({
+        exam,
+        examId: id,
+        answers
+    })
+
+    useBeforeUnload(!submitted);
+
+    useRefreshSubmit({
+        enabled: !submitted,
+        submitExam: handleSubmitExam
+    })
+
+    const handleViolation = useCallback((type) => {
+        setViolations(prev => {
+            const currentCount = prev[type];
+            const nextCount = Math.max(currentCount - 1, 0);
+
+            const messages = {
+                fullscreen: "Fullscreen exited",
+                focus: "Focus lost",
+                camera: "Camera violation"
+            }
+
+            toast.error(
+                `${messages[type]}! Remaining attempts: ${nextCount}`, 
+                { id: `${type}-violation` }
+            )
+            
+            if (nextCount === 0 && !submitted && !submitting) {
+                setTimeout(() => {
+                    handleSubmitExam({ silent: false });
+                    toast.error(`Exam auto-submitted: ${type} limit reached`, { id: 'auto-sub' });
+                }, 0);
+            }
+
+            return { ...prev, [type]: nextCount };
+        })
+    }, [submitted, submitting, handleSubmitExam]);
+
+    const handleCameraDisconnect = useCallback(() => {
+        handleViolation("camera");
+    }, [handleViolation])
+
+    const {
+        videoRef,
+        cameraError
+    } = useCamera({
+        enabled: !submitted,
+        onCameraDisconnected: handleCameraDisconnect
+    })
+
+    useFaceMonitoring({
+        enabled: !submitted,
+        videoRef,
+        onViolation: () =>
+            handleViolation("camera")
+    })
+
+    // Ensure your hooks use this updated handler
+    useFullscreen({
+        enabled: !submitted,
+        onViolation: () => handleViolation('fullscreen')
+    })
+
+    useFocusMonitor({
+        enabled: !submitted,
+        onViolation: () => handleViolation('focus')
+    })
+
+    useEffect(() => {
+        if (submitted) {
+            return;
+        }
+
+        function prevent(e)
+        {
+            e.preventDefault();
+        }
+
+        function handleKeyDown(e)
+        {
+            //
+            // F12
+            //
+            if (e.key === "F12")
+            {
+                e.preventDefault();
+            }
+
+            //
+            // Ctrl+Shift+I
+            // Ctrl+Shift+J
+            // Ctrl+U
+            //
+            if (
+                e.ctrlKey &&
+                (
+                    e.key.toLowerCase() === "u" ||
+                    (
+                        e.shiftKey &&
+                        ["i", "j", "c"].includes(
+                            e.key.toLowerCase()
+                        )
+                    )
+                )
+            )
+            {
+                e.preventDefault();
+            }
+
+            //
+            // copy/paste/cut/select
+            //
+            if (
+                e.ctrlKey &&
+                ["c", "v", "x", "a"].includes(
+                    e.key.toLowerCase()
+                )
+            )
+            {
+                e.preventDefault();
+            }
+        }
+
+        document.addEventListener(
+            "contextmenu",
+            prevent
+        );
+
+        document.addEventListener(
+            "copy",
+            prevent
+        );
+
+        document.addEventListener(
+            "paste",
+            prevent
+        );
+
+        document.addEventListener(
+            "cut",
+            prevent
+        );
+
+        window.addEventListener(
+            "keydown",
+            handleKeyDown
+        );
+
+        return () => {
+
+            document.removeEventListener(
+                "contextmenu",
+                prevent
+            );
+
+            document.removeEventListener(
+                "copy",
+                prevent
+            );
+
+            document.removeEventListener(
+                "paste",
+                prevent
+            );
+
+            document.removeEventListener(
+                "cut",
+                prevent
+            );
+
+            window.removeEventListener(
+                "keydown",
+                handleKeyDown
+            );
+        }
+
+    }, [submitted])
+
+    if (!isAuthenticated) {
+        return <Navigate to="/" replace />
+    }
+
+    if (loading) {
+        return <LoadingSpinner />
+    }
+
+    if (!exam) {
+        return null;
+    }
+
+    const currentQuestion = exam.questions[currentQuestionIndex];
+
+    return (
+        <div className="min-h-screen bg-black text-white px-6 py-8">
+
+            <div className="max-w-7xl mx-auto">
+
+                <div className="flex items-start justify-between gap-6">
+
+                    <div>
+
+                        <h1 className="text-4xl font-bold">
+                            {exam.title}
+                        </h1>
+
+                        <p className="text-zinc-500 mt-2">
+                            {exam.questions.length} Questions
+                        </p>
+
+                    </div>
+
+                    <div className="
+                        fixed top-6 right-6 z-50
+                        flex flex-col gap-3
+                    ">
+
+                        <div className="flex items-center gap-3">
+
+                            <div className="
+                                w-52 h-32 bg-zinc-950 border border-zinc-800
+                                rounded-2xl overflow-hidden relative
+                            ">
+
+                                {
+                                    cameraError
+                                    ?
+                                    <div className="
+                                        absolute inset-0 flex items-center justify-center
+                                        text-red-400 text-xs text-center px-3
+                                    ">
+                                        {cameraError}
+                                    </div>
+                                    :
+                                    <video
+                                        ref={videoRef}
+                                        autoPlay
+                                        muted
+                                        playsInline
+                                        controls={false}
+                                        disablePictureInPicture
+                                        className="w-full h-full object-cover scale-x-[-1]"
+                                    />
+                                }
+
+                            </div>
+
+                            <Timer timeLeft={timeLeft} />
+
+                        </div>
+
+                        <div className="
+                            bg-zinc-950 border border-zinc-800
+                            rounded-2xl p-2 space-y-1
+                        ">
+
+                            <div className="flex items-center justify-between gap-10">
+                                <p className="text-sm text-zinc-400">
+                                    Fullscreen Violations
+                                </p>
+
+                                <p className="font-semibold text-red-400">
+                                    {violations.fullscreen}
+                                </p>
+                            </div>
+
+                            <div className="flex items-center justify-between gap-10">
+                                <p className="text-sm text-zinc-400">
+                                    Focus Violations
+                                </p>
+
+                                <p className="font-semibold text-yellow-400">
+                                    {violations.focus}
+                                </p>
+                            </div>
+
+                            <div className="flex items-center justify-between gap-10">
+                                <p className="text-sm text-zinc-400">
+                                    Camera Violations
+                                </p>
+
+                                <p className="font-semibold text-orange-400">
+                                    {violations.camera}
+                                </p>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div className="mt-10">
+                    <div className="flex items-center justify-between mb-5">
+                        <p className="text-zinc-500 text-sm">
+                            Answers are automatically saved periodically
+                        </p>
+                    </div>
+
+                    <QuestionNavigation
+                        questions={exam.questions}
+                        currentQuestionIndex={currentQuestionIndex}
+                        setCurrentQuestionIndex={setCurrentQuestionIndex}
+                        answers={answers}
+                    />
+
+                </div>
+
+                <div className="
+                    mt-10 bg-zinc-900 border border-zinc-800
+                    rounded-3xl p-6 min-h-100
+                ">
+
+                    {
+                        exam.questions && exam.questions.length > 0 &&
+                        <QuestionRenderer
+                            question={currentQuestion}
+                            value={
+                                answers[currentQuestion._id]?.response
+                            }
+                            onChange={(response) =>
+                                updateAnswer(
+                                    currentQuestion._id,
+                                    response
+                                )
+                            }
+                        />
+                    }
+
+                </div>
+
+                <div className="mt-8 flex items-center justify-between">
+
+                    <button
+                        disabled={currentQuestionIndex === 0}
+                        onClick={() =>
+                            setCurrentQuestionIndex(prev => prev - 1)
+                        }
+                        className="
+                            px-6 py-3 rounded-2xl border border-zinc-800
+                            disabled:opacity-40
+                        "
+                    >
+                        Previous
+                    </button>
+
+                    <div className="relative">
+                        <button
+                            onClick={() => setShowSubmitConfirm(true)}
+                            className="
+                                bg-red-500 hover:bg-red-600 transition
+                                px-6 py-3 rounded-2xl font-semibold
+                            "
+                            disabled={submitting}
+                        >
+                            {
+                                submitting
+                                ? "Submitting..."
+                                : "Submit Exam"
+                            }
+                        </button>
+
+                        {
+                            showSubmitConfirm &&
+                            <div className="
+                                absolute left-1/2 -translate-x-1/2 bottom-16
+                                w-80 bg-zinc-950 border border-zinc-800
+                                rounded-2xl p-5 shadow-2xl z-50
+                            ">
+
+                                <h3 className="text-lg font-semibold">
+                                    Submit Exam?
+                                </h3>
+
+                                <p className="text-zinc-400 text-sm mt-2 leading-relaxed">
+                                    Are you sure you want to submit the exam?
+                                    You won't be able to change answers afterwards.
+                                </p>
+
+                                <div className="flex gap-3 mt-5">
+
+                                    <button
+                                        onClick={() => setShowSubmitConfirm(false)}
+                                        className="
+                                            flex-1 border border-zinc-700
+                                            py-2.5 rounded-xl
+                                        "
+                                    >
+                                        Cancel
+                                    </button>
+
+                                    <button
+                                        onClick={handleSubmitExam}
+                                        className="
+                                            flex-1 bg-red-500 hover:bg-red-600
+                                            py-2.5 rounded-xl font-semibold
+                                        "
+                                    >
+                                        Confirm
+                                    </button>
+
+                                </div>
+
+                            </div>
+                        }
+                    </div>
+
+                    <button
+                        disabled={
+                            currentQuestionIndex ===
+                            exam.questions.length - 1
+                        }
+                        onClick={() =>
+                            setCurrentQuestionIndex(prev => prev + 1)
+                        }
+                        className="
+                            px-6 py-3 rounded-2xl border border-zinc-800
+                            disabled:opacity-40
+                        "
+                    >
+                        Next
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+    )
+}
+
+export default ExamPage
+
+========================================
+FILE: src\features\exam\utils\exam-storage.js
+========================================
+
+
+export function getExamStorageKey(examId)
+{
+    return `exam_answers_${examId}`;
+}
+
+export function loadAnswers(examId)
+{
+    try {
+        const key = getExamStorageKey(examId);
+
+        const data = localStorage.getItem(key);
+
+        if (!data) {
+            return {};
+        }
+
+        return JSON.parse(data);
+    }
+    catch {
+        return {};
+    }
+}
+
+export function saveAnswers(examId, answers)
+{
+    const key = getExamStorageKey(examId);
+
+    localStorage.setItem(
+        key,
+        JSON.stringify(answers)
+    );
+}
+
+export function clearAnswers(examId)
+{
+    const key = getExamStorageKey(examId);
+
+    localStorage.removeItem(key);
+}
+
+========================================
+FILE: src\features\exam\utils\format-answers.js
+========================================
+
+
+export function formatAnswersForSubmission(answers)
+{
+    return Object.values(answers);
+}
+
+========================================
+FILE: src\index.css
+========================================
+
+@import "tailwindcss";
+
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    cursor: pointer;
+}
+
+@layer base {
+    button {
+        cursor: pointer;
+    }
+}
+
+========================================
+FILE: src\main.jsx
+========================================
+
+import './index.css'
+import App from './App.jsx'
+import { createRoot } from 'react-dom/client'
+
+createRoot(document.getElementById('root')).render(
+    <App />
+)
+
+
+========================================
+FILE: src\pages\CreateExamPage.jsx
+========================================
+
+import { useState } from "react"
+import toast from "react-hot-toast"
+import { useNavigate, Navigate } from "react-router-dom"
+
+import { createExam } from "../api/exam-api"
+import useAuthStore from "../store/auth-store"
+
+function CreateExamPage()
+{
+    const navigate = useNavigate();
+    const { isAuthenticated } = useAuthStore();
+
+    const [loading, setLoading] = useState(false);
+
+    const [formData, setFormData] = useState({
+        title: "",
+        startTime: "",
+        endTime: "",
+        eligibleCandidates: ""
+    })
+
+    if (!isAuthenticated) {
+        return <Navigate to="/" replace />;
+    }
+
+    function validateEmails(emails)
+    {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emails.every(email => emailRegex.test(email));
+    }
+
+    async function handleCreateExam()
+    {
+        try {
+            const { title, startTime, endTime, eligibleCandidates } = formData;
+
+            if (!title || !startTime || !endTime || !eligibleCandidates) {
+                return toast.error("All fields are required");
+            }
+
+            if (new Date(startTime) >= new Date(endTime)) {
+                return toast.error("Start time must be before end time");
+            }
+
+            if (new Date(startTime) < new Date()) {
+                return toast.error("Start time must be a future date");
+            }
+
+            const emails = eligibleCandidates
+                .split(/[\s,]+/)
+                .map(email => email.trim())
+                .filter(Boolean);
+
+            if (emails.length === 0) {
+                return toast.error("Please provide valid candidate emails");
+            }
+
+            if (!validateEmails(emails)) {
+                return toast.error("Invalid email format detected");
+            }
+
+            setLoading(true);
+
+            await createExam({
+                title,
+                startTime,
+                endTime,
+                eligibleCandidates
+            })
+
+            toast.success("Exam created successfully");
+            navigate("/");
+        }
+        catch(err) {
+            toast.error(err.response?.data?.message || "Failed to create exam");
+        }
+        finally {
+            setLoading(false);
+        }
+    }
+
+    return (
+        <div className="min-h-screen bg-black text-white px-6 py-10">
+
+            <div className="max-w-2xl mx-auto">
+
+                <div className="border border-zinc-800 bg-zinc-950 rounded-2xl p-8">
+
+                    <h1 className="text-4xl font-bold">
+                        Create Exam
+                    </h1>
+
+                    <p className="text-zinc-400 mt-3">
+                        Fill all mandatory details to create a new exam.
+                    </p>
+
+                    <div className="mt-8 space-y-5">
+
+                        <div>
+                            <label className="block mb-2 text-sm text-zinc-400">
+                                Exam Name
+                            </label>
+
+                            <input
+                                type="text"
+                                placeholder="Enter exam name"
+                                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none"
+                                value={formData.title}
+                                onChange={(e) => setFormData({
+                                    ...formData,
+                                    title: e.target.value
+                                })}
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block mb-2 text-sm text-zinc-400">
+                                Start Time
+                            </label>
+
+                            <input
+                                type="datetime-local"
+                                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none"
+                                value={formData.startTime}
+                                onChange={(e) => setFormData({
+                                    ...formData,
+                                    startTime: e.target.value
+                                })}
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block mb-2 text-sm text-zinc-400">
+                                End Time
+                            </label>
+
+                            <input
+                                type="datetime-local"
+                                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none"
+                                value={formData.endTime}
+                                onChange={(e) => setFormData({
+                                    ...formData,
+                                    endTime: e.target.value
+                                })}
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block mb-2 text-sm text-zinc-400">
+                                Eligible Candidates
+                            </label>
+
+                            <textarea
+                                rows={5}
+                                placeholder="a@gmail.com, b@gmail.com"
+                                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none resize-none"
+                                value={formData.eligibleCandidates}
+                                onChange={(e) => setFormData({
+                                    ...formData,
+                                    eligibleCandidates: e.target.value
+                                })}
+                            />
+
+                            <p className="text-sm text-zinc-500 mt-2">
+                                Enter emails separated by commas.
+                            </p>
+                        </div>
+
+                        <button
+                            onClick={handleCreateExam}
+                            disabled={loading}
+                            className="w-full bg-white text-black py-3 rounded-xl font-semibold hover:bg-zinc-200 transition"
+                        >
+                            {
+                                loading ? "Creating..." : "Create Exam"
+                            }
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    )
+}
+
+export default CreateExamPage
+
+========================================
+FILE: src\pages\EditExamPage.jsx
+========================================
+
+import toast from "react-hot-toast"
+import { useEffect, useState } from "react"
+import { Navigate, useNavigate, useParams } from "react-router-dom"
+
+import useAuthStore from "../store/auth-store"
+import { editExam } from "../api/exam-api"
+
+const EMPTY_QUESTION = (type = "mcq") => ({
+    type,
+    questionText: "",
+    options: ["", "", "", ""],
+    correctOption: "",
+    sampleAnswer: "",
+    fullScore: ""
+})
+
+function EditExamPage()
+{
+    const navigate = useNavigate();
+    const { id } = useParams();
+
+    const { isAuthenticated } = useAuthStore();
+
+    const [loading, setLoading] = useState(false);
+
+    const [selectedType, setSelectedType] = useState("change-time");
+
+    const [timeData, setTimeData] = useState({
+        startTime: "",
+        endTime: ""
+    })
+
+    const [candidateData, setCandidateData] = useState("");
+
+    const storageKey = `edit_exam_questions_${id}`;
+
+    const [questions, setQuestions] = useState(() => {
+        const existing = localStorage.getItem(storageKey);
+
+        if (existing) {
+            return JSON.parse(existing);
+        }
+
+        return [EMPTY_QUESTION()];
+    })
+
+    useEffect(() => {
+        localStorage.setItem(storageKey, JSON.stringify(questions));
+    }, [questions, storageKey])
+
+    function validateEmails(emails)
+    {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emails.every(email => emailRegex.test(email));
+    }
+
+    function isQuestionEmpty(q)
+    {
+        return (
+            !q.questionText &&
+            !q.sampleAnswer &&
+            !q.correctOption &&
+            !q.fullScore &&
+            q.options.every(op => !op)
+        );
+    }
+
+    function ensureLastEmpty(updated)
+    {
+        const last = updated[updated.length - 1];
+
+        const hasContent =
+            last.questionText ||
+            last.sampleAnswer ||
+            last.correctOption ||
+            last.fullScore ||
+            last.options.some(op => op);
+
+        if (hasContent)
+        {
+            updated.push(
+                EMPTY_QUESTION(last.type)
+            )
+        }
+
+        return updated;
+    }
+
+    function handleQuestionChange(index, field, value)
+    {
+        let updated = [...questions];
+
+        updated[index][field] = value;
+
+        updated = updated.filter((q, idx) => {
+            if (idx === updated.length - 1) {
+                return true;
+            }
+
+            return !isQuestionEmpty(q);
+        })
+
+        setQuestions(ensureLastEmpty(updated));
+    }
+
+    function handleOptionChange(questionIndex, optionIndex, value)
+    {
+        let updated = [...questions];
+
+        updated[questionIndex].options[optionIndex] = value;
+
+        updated = updated.filter((q, idx) => {
+            if (idx === updated.length - 1) {
+                return true;
+            }
+
+            return !isQuestionEmpty(q);
+        })
+
+        setQuestions(ensureLastEmpty(updated));
+    }
+
+    if (!isAuthenticated) {
+        return <Navigate to="/" replace />;
+    }
+
+    async function handleChangeTime()
+    {
+        try {
+            const { startTime, endTime } = timeData;
+
+            if (!startTime || !endTime) {
+                return toast.error("All fields required");
+            }
+
+            if (new Date(startTime) < new Date()) {
+                return toast.error("Start time must be future");
+            }
+
+            if (new Date(startTime) >= new Date(endTime)) {
+                return toast.error("End time must be after start time");
+            }
+
+            setLoading(true);
+
+            await editExam(id, {
+                type: "change-time",
+                startTime,
+                endTime
+            })
+
+            toast.success("Schedule updated");
+            navigate("/");
+        }
+        catch(err) {
+            toast.error(err.response?.data?.message || "Failed");
+        }
+        finally {
+            setLoading(false);
+        }
+    }
+
+    async function handleAddCandidates()
+    {
+        try {
+            const emails = candidateData
+                .split(/[\s,]+/)
+                .map(e => e.trim())
+                .filter(Boolean);
+
+            if (emails.length === 0) {
+                return toast.error("Please enter emails");
+            }
+
+            if (!validateEmails(emails)) {
+                return toast.error("Invalid email format");
+            }
+
+            setLoading(true);
+
+            await editExam(id, {
+                type: "add-candidates",
+                eligibleCandidates: candidateData
+            })
+
+            toast.success("Candidates added");
+            navigate("/");
+        }
+        catch(err) {
+            toast.error(err.response?.data?.message || "Failed");
+        }
+        finally {
+            setLoading(false);
+        }
+    }
+
+    async function handleAddQuestions()
+    {
+        try {
+            const filtered = questions.filter(q => q.questionText.trim());
+
+            if (filtered.length === 0) {
+                return toast.error("Please add at least one question");
+            }
+
+            for (const q of filtered)
+            {
+                if (!q.questionText || !q.fullScore) {
+                    return toast.error("Question text and full score required");
+                }
+
+                if (q.type === "mcq")
+                {
+                    if (q.options.some(op => !op.trim())) {
+                        return toast.error("All MCQ options required");
+                    }
+
+                    if (
+                        q.correctOption === "" ||
+                        Number(q.correctOption) < 0 ||
+                        Number(q.correctOption) > 3
+                    ) {
+                        return toast.error("Correct option must be between 0 and 3");
+                    }
+                }
+
+                if (q.type === "theory")
+                {
+                    if (!q.sampleAnswer.trim()) {
+                        return toast.error("Sample answer required");
+                    }
+                }
+            }
+
+            setLoading(true);
+
+            await editExam(id, {
+                type: "add-question",
+                questions: filtered.map(q => ({
+                    type: q.type,
+                    questionText: q.questionText,
+                    options: q.type === "mcq" ? q.options : undefined,
+                    correctOption: q.type === "mcq"
+                        ? Number(q.correctOption)
+                        : undefined,
+                    sampleAnswer: q.type === "theory"
+                        ? q.sampleAnswer
+                        : undefined,
+                    fullScore: Number(q.fullScore)
+                }))
+            })
+
+            localStorage.removeItem(storageKey);
+
+            toast.success("Questions added");
+            navigate("/");
+        }
+        catch(err) {
+            toast.error(err.response?.data?.message || "Failed");
+        }
+        finally {
+            setLoading(false);
+        }
+    }
+
+    return (
+        <div className="min-h-screen bg-black text-white px-6 py-10">
+
+            <div className="max-w-5xl mx-auto">
+
+                <h1 className="text-5xl font-bold">
+                    Edit Exam
+                </h1>
+
+                <div className="flex gap-3 mt-10 flex-wrap">
+
+                    {
+                        ["change-time", "add-candidates", "add-question"]
+                        .map(type => (
+
+                            <button
+                                key={type}
+                                onClick={() => setSelectedType(type)}
+                                className={`px-5 py-3 rounded-xl border transition ${
+                                    selectedType === type
+                                    ? "bg-white text-black border-white"
+                                    : "bg-zinc-900 border-zinc-800"
+                                }`}
+                            >
+                                {type}
+                            </button>
+                        ))
+                    }
+
+                </div>
+
+                {
+                    selectedType === "change-time" &&
+                    <div className="mt-10 bg-zinc-950 border border-zinc-800 rounded-2xl p-8 space-y-5">
+
+                        <input
+                            type="datetime-local"
+                            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none"
+                            value={timeData.startTime}
+                            onChange={(e) => setTimeData({
+                                ...timeData,
+                                startTime: e.target.value
+                            })}
+                        />
+
+                        <input
+                            type="datetime-local"
+                            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none"
+                            value={timeData.endTime}
+                            onChange={(e) => setTimeData({
+                                ...timeData,
+                                endTime: e.target.value
+                            })}
+                        />
+
+                        <button
+                            onClick={handleChangeTime}
+                            disabled={loading}
+                            className="w-full bg-white text-black py-3 rounded-xl font-semibold"
+                        >
+                            {
+                                loading ? "Updating..." : "Update Schedule"
+                            }
+                        </button>
+
+                    </div>
+                }
+
+                {
+                    selectedType === "add-candidates" &&
+                    <div className="mt-10 bg-zinc-950 border border-zinc-800 rounded-2xl p-8">
+
+                        <textarea
+                            rows={6}
+                            placeholder="a@gmail.com, b@gmail.com"
+                            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none resize-none"
+                            value={candidateData}
+                            onChange={(e) => setCandidateData(e.target.value)}
+                        />
+
+                        <p className="text-zinc-500 text-sm mt-2">
+                            Enter emails separated by commas.
+                        </p>
+
+                        <button
+                            onClick={handleAddCandidates}
+                            disabled={loading}
+                            className="w-full bg-white text-black py-3 rounded-xl font-semibold mt-6"
+                        >
+                            {
+                                loading ? "Adding..." : "Add Candidates"
+                            }
+                        </button>
+
+                    </div>
+                }
+
+                {
+                    selectedType === "add-question" &&
+                    <div className="mt-10 space-y-8">
+
+                        {
+                            questions.map((q, index) => (
+
+                                <div
+                                    key={index}
+                                    className="bg-zinc-950 border border-zinc-800 rounded-2xl p-5"
+                                >
+
+                                    <div className="flex items-center justify-between">
+
+                                        <h2 className="text-lg font-semibold">
+                                            Question {index + 1}
+                                        </h2>
+
+                                        <select
+                                            className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2 outline-none"
+                                            value={q.type}
+                                            onChange={(e) => handleQuestionChange(
+                                                index,
+                                                "type",
+                                                e.target.value
+                                            )}
+                                        >
+                                            <option value="mcq">mcq</option>
+                                            <option value="theory">theory</option>
+                                            <option value="coding">coding</option>
+                                        </select>
+
+                                    </div>
+
+                                    <div className="mt-4 space-y-3">
+
+                                        <textarea
+                                            rows={3}
+                                            placeholder="Question Text"
+                                            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none resize-none"
+                                            value={q.questionText}
+                                            onChange={(e) => handleQuestionChange(
+                                                index,
+                                                "questionText",
+                                                e.target.value
+                                            )}
+                                        />
+
+                                        <input
+                                            type="number"
+                                            placeholder="Full Score"
+                                            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none"
+                                            value={q.fullScore}
+                                            onChange={(e) => handleQuestionChange(
+                                                index,
+                                                "fullScore",
+                                                e.target.value
+                                            )}
+                                        />
+
+                                        {
+                                            q.type === "mcq" &&
+                                            <div className="space-y-4">
+
+                                                {
+                                                    q.options.map((op, opIndex) => (
+
+                                                        <input
+                                                            key={opIndex}
+                                                            type="text"
+                                                            placeholder={`Option ${opIndex}`}
+                                                            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none"
+                                                            value={op}
+                                                            onChange={(e) => handleOptionChange(
+                                                                index,
+                                                                opIndex,
+                                                                e.target.value
+                                                            )}
+                                                        />
+                                                    ))
+                                                }
+
+                                                <input
+                                                    type="number"
+                                                    min={0}
+                                                    max={3}
+                                                    placeholder="Choose correct answer index (0 to 3)"
+                                                    className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none"
+                                                    value={q.correctOption}
+                                                    onChange={(e) => handleQuestionChange(
+                                                        index,
+                                                        "correctOption",
+                                                        e.target.value
+                                                    )}
+                                                />
+
+                                            </div>
+                                        }
+
+                                        {
+                                            q.type === "theory" &&
+                                            <textarea
+                                                rows={4}
+                                                placeholder="Sample Answer"
+                                                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none resize-none"
+                                                value={q.sampleAnswer}
+                                                onChange={(e) => handleQuestionChange(
+                                                    index,
+                                                    "sampleAnswer",
+                                                    e.target.value
+                                                )}
+                                            />
+                                        }
+
+                                    </div>
+
+                                </div>
+                            ))
+                        }
+
+                        <button
+                            onClick={handleAddQuestions}
+                            disabled={loading}
+                            className="w-full bg-white text-black py-4 rounded-2xl font-semibold"
+                        >
+                            {
+                                loading ? "Submitting..." : "Submit Questions"
+                            }
+                        </button>
+
+                    </div>
+                }
+
+            </div>
+
+        </div>
+    )
+}
+
+export default EditExamPage
+
+========================================
+FILE: src\pages\ExamFinishedPage.jsx
+========================================
+
+
+function ExamFinishedPage()
+{
+    return (
+        <div className="
+            min-h-screen bg-black text-white
+            flex items-center justify-center px-6
+        ">
+
+            <div className="
+                max-w-xl w-full bg-zinc-950 border border-zinc-800
+                rounded-3xl p-10 text-center
+            ">
+
+                <h1 className="text-5xl font-bold">
+                    Exam Submitted
+                </h1>
+
+                <p className="mt-6 text-zinc-400 text-lg leading-relaxed">
+                    Your responses have been submitted successfully.
+                    Thank you for participating.
+                </p>
+
+            </div>
+
+        </div>
+    )
+}
+
+export default ExamFinishedPage
+
+========================================
+FILE: src\pages\HomePage.jsx
+========================================
+
+import { useEffect, useState } from "react"
+
+import useAuthStore from "../store/auth-store"
+import { getExamDetails } from "../api/exam-api"
+import ExamSection from "../components/ExamSection"
+import LoadingSpinner from "../components/LoadingSpinner"
+import DashboardHeader from "../components/DashboardHeader"
+
+function HomePage()
+{
+    const { user } = useAuthStore();
+
+    const [loading, setLoading] = useState(true);
+    const [selectedTab, setSelectedTab] = useState(() => {
+        return localStorage.getItem("selectedExamTab") || "upcoming";
+    })
+
+    const [upcomingExams, setUpcomingExams] = useState([]);
+    const [pastExams, setPastExams] = useState([]);
+
+    useEffect(() => {
+        localStorage.setItem("selectedExamTab", selectedTab);
+    }, [selectedTab])
+
+    useEffect(() => {
+        async function fetchExamDetails()
+        {
+            try {
+                const response = await getExamDetails();
+
+                setUpcomingExams(response.data.upcoming || []);
+                setPastExams(response.data.past || []);
+            }
+            catch(err) {
+                console.log(err.message);
+            }
+            finally {
+                setLoading(false);
+            }
+        }
+
+        fetchExamDetails();
+    }, [])
+
+    if (loading) {
+        return <LoadingSpinner />
+    }
+
+    return (
+        <div className="min-h-screen bg-black text-white px-6 py-10">
+
+            <div className="max-w-7xl mx-auto">
+
+                <DashboardHeader
+                    user={user}
+                    selectedTab={selectedTab}
+                    setSelectedTab={setSelectedTab}
+                />
+
+                {
+                    selectedTab === "upcoming" &&
+                    <ExamSection
+                        title="Upcoming Exams"
+                        exams={upcomingExams}
+                        type="upcoming"
+                        role={user.role}
+                    />
+                }
+
+                {
+                    selectedTab === "past" &&
+                    <ExamSection
+                        title="Past Exams"
+                        exams={pastExams}
+                        type="past"
+                        role={user.role}
+                    />
+                }
+            </div>
+        </div>
+    )
+}
+
+export default HomePage
+
+========================================
+FILE: src\pages\LandingPage.jsx
+========================================
+
+import { Link } from "react-router-dom"
+import { ShieldCheck } from "lucide-react"
+
+function LandingPage()
+{
+    return (
+        <div className="min-h-screen bg-black text-white">
+            
+            {/* Navbar */}
+            <nav className="flex items-center justify-between px-8 py-5 border-b border-zinc-800">
+                
+                <div className="flex items-center gap-2">
+                    <ShieldCheck size={30} />
+                    <h1 className="text-2xl font-bold">
+                        EVision
+                    </h1>
+                </div>
+
+                <Link to="/login">
+                    <button
+                        className="bg-white text-black px-5 py-2 rounded-lg font-semibold hover:bg-zinc-200 transition"
+                    >
+                        Login
+                    </button>
+                </Link>
+            </nav>
+
+            {/* Hero */}
+            <section className="flex flex-col items-center justify-center text-center px-6 py-32">
+                
+                <h1 className="text-6xl font-bold max-w-4xl leading-tight">
+                    Smart Online Examination Platform
+                </h1>
+
+                <p className="text-zinc-400 text-lg mt-6 max-w-2xl">
+                    Secure exams with fullscreen enforcement, AI proctoring,
+                    auto-save, auto-submit, and real-time monitoring.
+                </p>
+
+                <button
+                    className="mt-10 bg-white text-black px-8 py-4 rounded-xl text-lg font-semibold hover:bg-zinc-200 transition"
+                >
+                    Get Started
+                </button>
+            </section>
+        </div>
+    )
+}
+
+export default LandingPage
+
+========================================
+FILE: src\pages\LoginPage.jsx
+========================================
+
+import { useState } from "react"
+import toast from "react-hot-toast"
+import { loginManual } from "../api/auth-api"
+import useAuthStore from "../store/auth-store"
+import { useNavigate, Navigate } from "react-router-dom"
+
+function LoginPage()
+{
+    const navigate = useNavigate();
+    const { setUser, isAuthenticated } = useAuthStore();
+
+    const [formData, setFormData] = useState({
+        email: "",
+        password: ""
+    })
+
+    const [loading, setLoading] = useState(false);
+    
+    if (isAuthenticated) {
+        return <Navigate to="/" replace />;
+    }
+
+    async function handleLogin()
+    {
+        try {
+            setLoading(true);
+
+            const response = await loginManual(formData);
+            console.log(response);
+            setUser(response.data);
+
+            toast.success("Login successful");
+            navigate("/");
+        }
+        catch(err) {
+            toast.error(err.response?.data?.message || "Login failed");
+        }
+        finally {
+            setLoading(false);
+        }
+    }
+
+    return (
+        <div className="min-h-screen bg-black text-white flex items-center justify-center px-6">
+            
+            <div className="w-full max-w-md border border-zinc-800 rounded-2xl p-8 bg-zinc-950">
+
+                <h1 className="text-3xl font-bold text-center">
+                    Login
+                </h1>
+
+                <div className="mt-8 space-y-4">
+
+                    <input
+                        type="email"
+                        placeholder="Email"
+                        className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none"
+                        value={formData.email}
+                        onChange={(e) => setFormData({
+                            ...formData,
+                            email: e.target.value
+                        })}
+                    />
+
+                    <input
+                        type="password"
+                        placeholder="Password"
+                        className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none"
+                        value={formData.password}
+                        onChange={(e) => setFormData({
+                            ...formData,
+                            password: e.target.value
+                        })}
+                    />
+
+                    <button className="w-full bg-white text-black py-3 rounded-xl font-semibold hover:bg-zinc-200 transition"
+                    onClick={handleLogin}
+                    disabled={loading}
+                    >
+                        {
+                            loading ? "Logging in..." : "Login"
+                        }
+                    </button>
+
+                    <p className="text-center text-zinc-400 mt-6">
+                        Don't have an account?{" "}
+                        <a href="/signup" className="text-white hover:underline">
+                            Signup
+                        </a>
+                    </p>
+                </div>
+
+                <div className="mt-6 space-y-3">
+
+                    <button
+                        className="w-full border border-zinc-700 py-3 rounded-xl hover:bg-zinc-900 transition"
+                        onClick={() => {
+                            window.location.href = "http://localhost:3000/api/v1/auth/oauth/google";
+                        }}
+                    >
+                        Continue with Google
+                    </button>
+
+                    <button
+                        className="w-full border border-zinc-700 py-3 rounded-xl hover:bg-zinc-900 transition"
+                        onClick={() => {
+                            window.location.href = "http://localhost:3000/api/v1/auth/oauth/github";
+                        }}
+                    >
+                        Continue with GitHub
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    )
+}
+
+export default LoginPage
+
+========================================
+FILE: src\pages\ResultsPage.jsx
+========================================
+
+import toast from "react-hot-toast"
+import { useEffect, useState } from "react"
+import { useParams, Navigate } from "react-router-dom"
+
+import { getResults } from "../api/exam-api"
+import useAuthStore from "../store/auth-store"
+import LoadingSpinner from "../components/LoadingSpinner"
+
+function ResultsPage()
+{
+    const { id } = useParams();
+
+    const { isAuthenticated } = useAuthStore();
+
+    const [results, setResults] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        async function fetchResults()
+        {
+            try {
+                const response = await getResults(id);
+                setResults(response.data || []);
+            }
+            catch(err) {
+                toast.error(err.response?.data?.message || "Failed to fetch results");
+            }
+            finally {
+                setLoading(false);
+            }
+        }
+
+        fetchResults();
+    }, [id])
+
+    if (!isAuthenticated) {
+        return <Navigate to="/" replace />;
+    }
+
+    if (loading) {
+        return <LoadingSpinner />
+    }
+
+    return (
+        <div className="min-h-screen bg-black text-white px-6 py-10">
+
+            <div className="max-w-4xl mx-auto">
+
+                <div>
+                    <h1 className="text-5xl font-bold">
+                        Exam Results
+                    </h1>
+
+                    <p className="text-zinc-400 mt-3">
+                        Candidates ranked from highest to lowest score.
+                    </p>
+                </div>
+
+                {
+                    results.length === 0 &&
+                    <p className="mt-10 text-zinc-500">
+                        No results found
+                    </p>
+                }
+
+                <div className="mt-10 space-y-4">
+
+                    {
+                        results.map((result, index) => (
+
+                            <div
+                                key={result._id || index}
+                                className="bg-zinc-950 border border-zinc-800 rounded-2xl p-5 flex items-center justify-between"
+                            >
+
+                                <div>
+                                    <p className="text-lg font-semibold">
+                                        #{index + 1}
+                                    </p>
+
+                                    <p className="text-zinc-300 mt-1">
+                                        {result.email}
+                                    </p>
+                                </div>
+
+                                <div className="text-right">
+                                    <p className="text-2xl font-bold">
+                                        {result.totalScore}
+                                    </p>
+
+                                    <p className="text-zinc-500 text-sm">
+                                        marks
+                                    </p>
+                                </div>
+
+                            </div>
+                        ))
+                    }
+
+                </div>
+
+            </div>
+
+        </div>
+    )
+}
+
+export default ResultsPage
+
+========================================
+FILE: src\pages\SignupPage.jsx
+========================================
+
+import { useState } from "react"
+import toast from "react-hot-toast"
+import { Navigate, useNavigate } from "react-router-dom"
+import useAuthStore from "../store/auth-store"
+import { signupManual, verifySignup } from "../api/auth-api"
+
+function SignupPage()
+{
+    const navigate = useNavigate();
+    const { setUser, isAuthenticated } = useAuthStore();
+    
+    const [step, setStep] = useState(1);
+    const [loading, setLoading] = useState(false);
+
+    const [formData, setFormData] = useState({
+        email: "",
+        password: "",
+        otp: ""
+    })
+    
+    if (isAuthenticated) {
+        return <Navigate to="/" replace />;
+    }
+
+    async function sendOtp()
+    {
+        try {
+            setLoading(true);
+
+            await signupManual({
+                email: formData.email
+            })
+
+            toast.success("OTP sent successfully");
+            setStep(2);
+        }
+        catch(err) {
+            toast.error(err.response?.data?.message || "Failed to send OTP");
+        }
+        finally {
+            setLoading(false);
+        }
+    }
+
+    async function handleSignup()
+    {
+        try {
+            setLoading(true);
+
+            const response = await verifySignup(formData);
+            setUser(response.data);
+
+            toast.success("Signup successful");
+            navigate("/");
+        }
+        catch(err) {
+            toast.error(err.response?.data?.message || "Signup failed");
+        }
+        finally {
+            setLoading(false);
+        }
+    }
+
+    return (
+        <div className="min-h-screen bg-black text-white flex items-center justify-center px-6">
+
+            <div className="w-full max-w-md border border-zinc-800 rounded-2xl p-8 bg-zinc-950">
+
+                <h1 className="text-3xl font-bold text-center">
+                    Signup
+                </h1>
+
+                {/* STEP 1 */}
+                {
+                    step === 1 &&
+                    <div className="mt-8 space-y-4">
+
+                        <input
+                            type="email"
+                            placeholder="Email"
+                            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none"
+                            value={formData.email}
+                            onChange={(e) => setFormData({
+                                ...formData,
+                                email: e.target.value
+                            })}
+                        />
+
+                        <button
+                            onClick={() => setStep(2)}
+                            className="w-full bg-white text-black py-3 rounded-xl font-semibold hover:bg-zinc-200 transition"
+                            onClick={sendOtp}
+                            disabled={loading}
+                        >
+                            {
+                                loading ? "Sending..." : "Send OTP"
+                            }
+                        </button>
+
+                        <p className="text-center text-zinc-400 mt-6">
+                            Already have an account?{" "}
+                            <a href="/login" className="text-white hover:underline">
+                                Login
+                            </a>
+                        </p>
+                    </div>
+                }
+
+                {/* STEP 2 */}
+                {
+                    step === 2 &&
+                    <div className="mt-8 space-y-4">
+
+                        <input
+                            type="password"
+                            placeholder="Password"
+                            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none"
+                            value={formData.password}
+                            onChange={(e) => setFormData({
+                                ...formData,
+                                password: e.target.value
+                            })}
+                        />
+
+                        <input
+                            type="text"
+                            placeholder="OTP"
+                            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none"
+                            value={formData.otp}
+                            onChange={(e) => setFormData({
+                                ...formData,
+                                otp: e.target.value
+                            })}
+                        />
+
+                        <button
+                            className="w-full bg-white text-black py-3 rounded-xl font-semibold hover:bg-zinc-200 transition"
+                            onClick={handleSignup}
+                            disabled={loading}
+                        >
+                            {
+                                loading ? "Creating..." : "Create Account"
+                            }
+                        </button>
+                    </div>
+                }
+
+                <div className="mt-6 space-y-3">
+
+                    <button
+                        className="w-full border border-zinc-700 py-3 rounded-xl hover:bg-zinc-900 transition"
+                        onClick={() => {
+                            window.location.href = "http://localhost:3000/api/v1/auth/oauth/google";
+                        }}
+                    >
+                        Continue with Google
+                    </button>
+
+                    <button
+                        className="w-full border border-zinc-700 py-3 rounded-xl hover:bg-zinc-900 transition"
+                        onClick={() => {
+                            window.location.href = "http://localhost:3000/api/v1/auth/oauth/github";
+                        }}
+                    >
+                        Continue with GitHub
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    )
+}
+
+export default SignupPage
+
+========================================
+FILE: src\routes\AppRoutes.jsx
+========================================
+
+import HomePage from "../pages/HomePage"
+import LoginPage from "../pages/LoginPage"
+import SignupPage from "../pages/SignupPage"
+import LandingPage from "../pages/LandingPage"
+import ResultsPage from "../pages/ResultsPage"
+import useAuthStore from "../store/auth-store"
+import EditExamPage from "../pages/EditExamPage"
+import CreateExamPage from "../pages/CreateExamPage"
+import ExamPage from "../features/exam/pages/ExamPage"
+import ExamFinishedPage from "../pages/ExamFinishedPage"
+import { BrowserRouter, Routes, Route } from "react-router-dom"
+
+function AppRoutes()
+{
+    const { isAuthenticated } = useAuthStore();
+
+    return (
+        <BrowserRouter>
+            <Routes>
+                <Route path="/" element={ isAuthenticated ? <HomePage /> : <LandingPage /> } />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/signup" element={<SignupPage />} />
+                <Route path="/exam/create" element={<CreateExamPage/>} />
+                <Route path="/exam/results/:id" element={<ResultsPage/>} />
+                <Route path="/exam/edit/:id" element={<EditExamPage />} />
+                <Route path="/exam/:id" element={<ExamPage />} />
+                <Route path="/exam-finished" element={<ExamFinishedPage />} />
+            </Routes>
+        </BrowserRouter>
+    )
+}
+
+export default AppRoutes
+
+========================================
+FILE: src\store\auth-store.js
+========================================
+
+import { create } from "zustand"
+
+const useAuthStore = create((set) => ({
+    user: null,
+    loading: true,
+    isAuthenticated: false,
+
+    setUser: (userData) => set({
+        user: userData,
+        isAuthenticated: !!userData,
+        loading: false
+    }),
+
+    logout: () => set({
+        user: null,
+        isAuthenticated: false
+    })
+}))
+
+export default useAuthStore
