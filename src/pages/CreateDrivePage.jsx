@@ -181,42 +181,43 @@ export default function CreateDrivePage() {
 
     // ── Render ─────────────────────────────────────────────────────────────────
     return (
-        <div className="min-h-screen bg-black text-white px-6 py-10">
-            <div className="max-w-3xl mx-auto">
+        <div style={{ padding: "32px 36px", maxWidth: 760, margin: "0 auto" }}>
 
-                <button onClick={() => navigate("/")} className="flex items-center gap-2 text-zinc-400 hover:text-white text-sm mb-6 transition">
-                    <ArrowLeft size={16} /> Dashboard
-                </button>
+            <button onClick={() => navigate("/my-drives")} style={{ display:"flex", alignItems:"center", gap:6, background:"none", border:"none", color:"var(--text-2)", fontSize:13, cursor:"pointer", marginBottom:20, padding:0 }}>
+                <ArrowLeft size={15} /> My Drives
+            </button>
 
-                <h1 className="text-3xl font-bold mb-2">Create a New Drive</h1>
-                <p className="text-zinc-500 text-sm mb-8">Set up your hiring drive — eligibility, questions, and pipeline config.</p>
+            <h1 style={{ fontSize:24, fontWeight:700, margin:"0 0 4px" }}>Create a New Drive</h1>
+            <p style={{ color:"var(--text-3)", fontSize:13.5, margin:"0 0 28px" }}>Set up your hiring drive — eligibility, questions, and pipeline config.</p>
 
-                {/* Step Progress */}
-                <div className="flex items-center gap-2 mb-10">
+            {/* Step Progress */}
+            <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:28 }}>
                     {STEPS.map((s, i) => {
                         const Icon = s.icon
                         const active = step === s.id
                         const done = step > s.id
                         return (
-                            <div key={s.id} className="flex items-center gap-2 flex-1">
-                                <div className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-all whitespace-nowrap ${
-                                    active ? "bg-violet-600 text-white" :
-                                    done ? "bg-emerald-600/20 text-emerald-400 border border-emerald-600/30" :
-                                    "bg-zinc-900 text-zinc-500 border border-zinc-800"
-                                }`}>
+                            <div key={s.id} style={{ display:"flex", alignItems:"center", gap:8, flex:1 }}>
+                                <div style={{
+                                    display:"flex", alignItems:"center", gap:6,
+                                    padding:"6px 12px", borderRadius:9,
+                                    fontSize:12, fontWeight:600, whiteSpace:"nowrap",
+                                    background: active ? "var(--primary)" : done ? "rgba(5,150,105,0.15)" : "var(--card)",
+                                    color: active ? "white" : done ? "#6ee7b7" : "var(--text-3)",
+                                    border: `1px solid ${active ? "transparent" : done ? "rgba(5,150,105,0.3)" : "var(--border)"}`
+                                }}>
                                     {done ? <CheckCircle2 size={12} /> : <Icon size={12} />}
-                                    <span className="hidden sm:block">{s.label}</span>
-                                    <span className="sm:hidden">{s.id}</span>
+                                    {s.label}
                                 </div>
-                                {i < STEPS.length - 1 && <div className={`h-px flex-1 ${done ? "bg-emerald-600/30" : "bg-zinc-800"}`} />}
+                                {i < STEPS.length - 1 && <div style={{ flex:1, height:1, background: done ? "rgba(5,150,105,0.3)" : "var(--border)" }} />}
                             </div>
                         )
                     })}
                 </div>
 
-                <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-8">
+            <div className="card">
 
-                    {/* ── Step 1: Drive Details ── */}
+                {/* ── Step 1: Drive Details ── */}
                     {step === 1 && (
                         <div className="space-y-5">
                             <h2 className="text-xl font-semibold mb-6">Drive Details</h2>
@@ -298,7 +299,7 @@ export default function CreateDrivePage() {
                                     placeholder="JavaScript, DSA, Python" className={inputCls} />
                             </Field>
 
-                            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-sm text-zinc-400">
+                            <div style={{ background:"rgba(124,58,237,0.05)", border:"1px solid rgba(124,58,237,0.2)", borderRadius:10, padding:"12px 16px", fontSize:13, color:"var(--text-3)" }}>
                                 💡 Leave fields blank to make the drive open to everyone.
                             </div>
                         </div>
@@ -362,39 +363,32 @@ export default function CreateDrivePage() {
                                 ))}
                             </ReviewCard>
 
-                            <div className="bg-violet-500/5 border border-violet-500/20 rounded-xl p-4 text-sm text-zinc-400">
-                                Clicking <strong className="text-white">Publish Drive</strong> will create the drive, save all questions, and make it visible to candidates immediately.
+                            <div style={{ background:"rgba(124,58,237,0.05)", border:"1px solid rgba(124,58,237,0.2)", borderRadius:10, padding:"12px 16px", fontSize:13, color:"var(--text-3)" }}>
+                                Clicking <strong style={{ color:"var(--text-1)" }}>Publish Drive</strong> will create the drive, save all questions, and make it visible to candidates immediately.
                             </div>
                         </div>
                     )}
 
                     {/* Navigation */}
-                    <div className="flex gap-3 mt-8">
+                    <div style={{ display:"flex", gap:10, marginTop:28 }}>
                         {step > 1 && (
-                            <button onClick={() => setStep(s => s - 1)}
-                                className="flex-1 border border-zinc-700 py-3 rounded-xl font-medium hover:bg-zinc-900 transition flex items-center justify-center gap-2">
-                                <ArrowLeft size={16} /> Back
+                            <button onClick={() => setStep(s => s - 1)} className="btn btn-ghost" style={{ flex:1, justifyContent:"center", padding:"11px 0" }}>
+                                <ArrowLeft size={15} /> Back
                             </button>
                         )}
 
                         {step < 4 ? (
-                            <button onClick={nextStep}
-                                className="flex-1 bg-violet-600 py-3 rounded-xl font-semibold hover:bg-violet-500 transition flex items-center justify-center gap-2">
-                                Continue <ArrowRight size={16} />
+                            <button onClick={nextStep} className="btn btn-primary" style={{ flex:1, justifyContent:"center", padding:"11px 0", fontSize:14 }}>
+                                Continue <ArrowRight size={15} />
                             </button>
                         ) : (
-                            <button onClick={handleCreateDrive} disabled={loading}
-                                className="flex-1 bg-white text-black py-3 rounded-xl font-semibold hover:bg-zinc-200 transition flex items-center justify-center gap-2 disabled:opacity-60">
-                                {loading
-                                    ? <><Loader2 size={18} className="animate-spin" /> Publishing...</>
-                                    : <><CheckCircle2 size={18} /> Publish Drive</>
-                                }
+                            <button onClick={handleCreateDrive} disabled={loading} className="btn" style={{ flex:1, justifyContent:"center", padding:"11px 0", fontSize:14, background:"white", color:"black", opacity: loading ? 0.6 : 1 }}>
+                                {loading ? <><Loader2 size={16} className="animate-spin" /> Publishing...</> : <><CheckCircle2 size={16} /> Publish Drive</>}
                             </button>
                         )}
                     </div>
                 </div>
 
-            </div>
         </div>
     )
 }
@@ -402,89 +396,89 @@ export default function CreateDrivePage() {
 // ── Question Card ──────────────────────────────────────────────────────────────
 function QuestionCard({ q, idx, onUpdate, onOptionUpdate, onRemove }) {
     const [collapsed, setCollapsed] = useState(false)
-    const total_qs = "Q" + (idx + 1)
 
     return (
-        <div className="border border-zinc-800 rounded-2xl bg-zinc-900/40 overflow-hidden">
-            {/* Header */}
-            <div className="flex items-center justify-between px-5 py-4">
-                <div className="flex items-center gap-3">
-                    <span className="text-xs font-bold text-zinc-500">{total_qs}</span>
+        <div style={{ border:"1px solid var(--border)", borderRadius:12, background:"rgba(255,255,255,0.01)", overflow:"hidden" }}>
+            <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", padding:"14px 18px" }}>
+                <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                    <span style={{ fontSize:11, fontWeight:700, color:"var(--text-3)" }}>Q{idx+1}</span>
                     <select value={q.type} onChange={e => onUpdate(idx, "type", e.target.value)}
-                        className="text-xs bg-zinc-800 border border-zinc-700 rounded-lg px-2 py-1 outline-none text-white">
+                        style={{ fontSize:12, background:"var(--card)", border:"1px solid var(--border)", borderRadius:7, padding:"3px 8px", color:"var(--text-1)", outline:"none" }}>
                         <option value="mcq">MCQ</option>
                         <option value="theory">Theory</option>
                         <option value="coding">Coding</option>
                     </select>
-                    <span className="text-xs text-zinc-600">
-                        {q.questionText ? q.questionText.slice(0, 40) + (q.questionText.length > 40 ? "..." : "") : "Untitled question"}
+                    <span style={{ fontSize:12, color:"var(--text-3)" }}>
+                        {q.questionText ? q.questionText.slice(0,40) + (q.questionText.length > 40 ? "..." : "") : "Untitled question"}
                     </span>
                 </div>
-                <div className="flex items-center gap-2">
-                    <button onClick={() => setCollapsed(c => !c)} className="text-zinc-500 hover:text-white transition p-1">
-                        <ChevronDown size={16} className={`transition-transform ${collapsed ? "rotate-180" : ""}`} />
+                <div style={{ display:"flex", gap:6 }}>
+                    <button onClick={() => setCollapsed(c => !c)} style={{ background:"none", border:"none", color:"var(--text-3)", cursor:"pointer", padding:4 }}>
+                        <ChevronDown size={16} style={{ transform: collapsed ? "rotate(180deg)" : "none", transition:"transform 0.2s" }} />
                     </button>
-                    <button onClick={() => onRemove(idx)} className="text-red-500/60 hover:text-red-400 transition p-1">
+                    <button onClick={() => onRemove(idx)} style={{ background:"none", border:"none", color:"rgba(239,68,68,0.5)", cursor:"pointer", padding:4 }}>
                         <Trash2 size={14} />
                     </button>
                 </div>
             </div>
 
             {!collapsed && (
-                <div className="px-5 pb-5 space-y-4 border-t border-zinc-800">
-                    <div className="pt-4">
-                        <textarea rows={3} placeholder="Enter your question..." value={q.questionText}
-                            onChange={e => onUpdate(idx, "questionText", e.target.value)}
-                            className={inputCls + " resize-none"} />
-                    </div>
+                <div style={{ padding:"0 18px 18px", borderTop:"1px solid var(--border)" }}>
+                    <textarea rows={3} placeholder="Enter your question..." value={q.questionText}
+                        onChange={e => onUpdate(idx, "questionText", e.target.value)}
+                        className={inputCls + " resize-none"} style={{ marginTop:14 }} />
 
-                    {/* MCQ Options */}
                     {q.type === "mcq" && (
-                        <div className="space-y-2">
-                            <p className="text-xs text-zinc-500 uppercase tracking-widest font-medium">Options</p>
-                            {q.options.map((op, opIdx) => (
-                                <div key={opIdx} className="flex items-center gap-3">
-                                    <div className={`w-6 h-6 rounded-full border-2 flex-shrink-0 flex items-center justify-center text-xs font-bold cursor-pointer transition ${
-                                        q.correctOption === opIdx
-                                            ? "border-emerald-500 bg-emerald-500 text-white"
-                                            : "border-zinc-700 text-zinc-600 hover:border-emerald-500/50"
-                                    }`} onClick={() => onUpdate(idx, "correctOption", opIdx)}>
-                                        {String.fromCharCode(65 + opIdx)}
+                        <div style={{ marginTop:14 }}>
+                            <p style={{ fontSize:11, color:"var(--text-3)", textTransform:"uppercase", letterSpacing:"0.06em", margin:"0 0 10px", fontWeight:600 }}>Options</p>
+                            <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+                                {q.options.map((op, opIdx) => (
+                                    <div key={opIdx} style={{ display:"flex", alignItems:"center", gap:10 }}>
+                                        <div onClick={() => onUpdate(idx, "correctOption", opIdx)}
+                                            style={{
+                                                width:26, height:26, borderRadius:"50%", flexShrink:0, cursor:"pointer",
+                                                display:"flex", alignItems:"center", justifyContent:"center",
+                                                fontSize:11, fontWeight:700, transition:"all 0.15s",
+                                                border: `2px solid ${q.correctOption === opIdx ? "#059669" : "#3f3f46"}`,
+                                                background: q.correctOption === opIdx ? "#059669" : "transparent",
+                                                color: q.correctOption === opIdx ? "white" : "#52525b"
+                                            }}>
+                                            {String.fromCharCode(65 + opIdx)}
+                                        </div>
+                                        <input type="text" placeholder={`Option ${String.fromCharCode(65 + opIdx)}`}
+                                            value={op} onChange={e => onOptionUpdate(idx, opIdx, e.target.value)}
+                                            className={inputCls} style={{ flex:1 }} />
                                     </div>
-                                    <input type="text" placeholder={`Option ${String.fromCharCode(65 + opIdx)}`}
-                                        value={op} onChange={e => onOptionUpdate(idx, opIdx, e.target.value)}
-                                        className={inputCls + " flex-1"} />
-                                </div>
-                            ))}
-                            <p className="text-xs text-zinc-600">Click the circle to mark the correct answer.</p>
+                                ))}
+                            </div>
+                            <p style={{ fontSize:11, color:"var(--text-3)", marginTop:8 }}>Click the circle to mark the correct answer.</p>
                         </div>
                     )}
 
-                    {/* Theory Sample Answer */}
                     {q.type === "theory" && (
-                        <div>
-                            <p className="text-xs text-zinc-500 uppercase tracking-widest font-medium mb-2">Sample Answer</p>
+                        <div style={{ marginTop:14 }}>
+                            <p style={{ fontSize:11, color:"var(--text-3)", textTransform:"uppercase", letterSpacing:"0.06em", margin:"0 0 8px", fontWeight:600 }}>Sample Answer</p>
                             <textarea rows={3} placeholder="Ideal answer / key points..."
                                 value={q.sampleAnswer} onChange={e => onUpdate(idx, "sampleAnswer", e.target.value)}
                                 className={inputCls + " resize-none"} />
                         </div>
                     )}
 
-                    <Field label="Marks for this question">
+                    <div style={{ marginTop:14 }}>
+                        <label style={{ fontSize:11, color:"var(--text-3)", textTransform:"uppercase", letterSpacing:"0.06em", fontWeight:600, display:"block", marginBottom:6 }}>Marks</label>
                         <input type="number" min="1" placeholder="e.g. 10" value={q.fullScore}
-                            onChange={e => onUpdate(idx, "fullScore", e.target.value)} className={inputCls + " w-32"} />
-                    </Field>
+                            onChange={e => onUpdate(idx, "fullScore", e.target.value)} className={inputCls} style={{ width:120 }} />
+                    </div>
                 </div>
             )}
         </div>
     )
 }
 
-// ── Small components ───────────────────────────────────────────────────────────
 function Field({ label, children }) {
     return (
-        <div className="space-y-1.5">
-            <label className="text-xs uppercase tracking-widest text-zinc-500 font-medium">{label}</label>
+        <div style={{ display:"flex", flexDirection:"column", gap:5 }}>
+            <label style={{ fontSize:11, color:"var(--text-3)", textTransform:"uppercase", letterSpacing:"0.06em", fontWeight:600 }}>{label}</label>
             {children}
         </div>
     )
@@ -492,20 +486,20 @@ function Field({ label, children }) {
 
 function ReviewCard({ title, children }) {
     return (
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
-            <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wide mb-4">{title}</h3>
-            <div className="space-y-1">{children}</div>
+        <div style={{ background:"var(--surface)", border:"1px solid var(--border)", borderRadius:10, padding:18 }}>
+            <h3 style={{ fontSize:11, fontWeight:700, color:"var(--text-3)", textTransform:"uppercase", letterSpacing:"0.07em", margin:"0 0 14px" }}>{title}</h3>
+            <div>{children}</div>
         </div>
     )
 }
 
 function Row({ l, v }) {
     return (
-        <div className="flex justify-between py-1.5 border-b border-zinc-800/60 last:border-0">
-            <span className="text-xs text-zinc-500">{l}</span>
-            <span className="text-xs text-white font-medium">{String(v)}</span>
+        <div style={{ display:"flex", justifyContent:"space-between", padding:"6px 0", borderBottom:"1px solid var(--border)" }}>
+            <span style={{ fontSize:12.5, color:"var(--text-3)" }}>{l}</span>
+            <span style={{ fontSize:12.5, color:"var(--text-1)", fontWeight:600 }}>{String(v)}</span>
         </div>
     )
 }
 
-const inputCls = "w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm outline-none focus:border-violet-500/50 transition text-white"
+const inputCls = "field-input"

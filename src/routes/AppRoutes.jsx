@@ -1,52 +1,80 @@
-import HomePage from "../pages/HomePage"
-import LoginPage from "../pages/LoginPage"
-import SignupPage from "../pages/SignupPage"
-import LandingPage from "../pages/LandingPage"
-import ResultsPage from "../pages/ResultsPage"
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 import useAuthStore from "../store/auth-store"
-import EditExamPage from "../pages/EditExamPage"
-import CreateExamPage from "../pages/CreateExamPage"
-import CreateRoomPage from "../pages/CreateRoomPage"
-import ExamPage from "../features/exam/pages/ExamPage"
+import AppShell from "../components/AppShell"
+
+// Public pages
+import LandingPage    from "../pages/LandingPage"
+import LoginPage      from "../pages/LoginPage"
+import SignupPage     from "../pages/SignupPage"
+
+// Authenticated pages
+import DashboardPage       from "../pages/DashboardPage"
+import BrowseDrivesPage    from "../pages/BrowseDrivesPage"
+import ApplyDrivePage      from "../pages/ApplyDrivePage"
+import MyApplicationsPage  from "../pages/MyApplicationsPage"
+import CreateDrivePage     from "../pages/CreateDrivePage"
+import MyDrivesPage        from "../pages/MyDrivesPage"
+import InterviewsPage      from "../pages/InterviewsPage"
+
+// Legacy exam system
+import CreateExamPage   from "../pages/CreateExamPage"
+import EditExamPage     from "../pages/EditExamPage"
+import ResultsPage      from "../pages/ResultsPage"
 import ExamFinishedPage from "../pages/ExamFinishedPage"
+import ExamPage         from "../features/exam/pages/ExamPage"
+import CreateRoomPage   from "../pages/CreateRoomPage"
 
-// New Drive System
-import BrowseDrivesPage from "../pages/BrowseDrivesPage"
-import ApplyDrivePage from "../pages/ApplyDrivePage"
-import MyApplicationsPage from "../pages/MyApplicationsPage"
-import CreateDrivePage from "../pages/CreateDrivePage"
+function PrivateRoute({ children }) {
+    const { isAuthenticated } = useAuthStore()
+    if (!isAuthenticated) return <Navigate to="/" replace />
+    return <AppShell>{children}</AppShell>
+}
 
-import { BrowserRouter, Routes, Route } from "react-router-dom"
+function ExaminerRoute({ children }) {
+    const { isAuthenticated, user } = useAuthStore()
+    if (!isAuthenticated) return <Navigate to="/" replace />
+    if (user?.role !== "examiner") return <Navigate to="/dashboard" replace />
+    return <AppShell>{children}</AppShell>
+}
 
-function AppRoutes()
-{
-    const { isAuthenticated } = useAuthStore();
+function AppRoutes() {
+    const { isAuthenticated } = useAuthStore()
 
     return (
         <BrowserRouter>
             <Routes>
-                {/* Root */}
-                <Route path="/" element={ isAuthenticated ? <HomePage /> : <LandingPage /> } />
+                {/* ── Public ─────────────────────────────────────────────── */}
+                <Route path="/"        element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <LandingPage />} />
+                <Route path="/login"   element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <LoginPage />} />
+                <Route path="/signup"  element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <SignupPage />} />
 
-                {/* Auth */}
-                <Route path="/login"  element={<LoginPage />} />
-                <Route path="/signup" element={<SignupPage />} />
+                {/* ── Exam (no shell — fullscreen) ────────────────────────── */}
+                <Route path="/exam/:id"        element={<ExamPage />} />
+                <Route path="/exam-finished"   element={<ExamFinishedPage />} />
 
-                {/* Legacy Exam System */}
-                <Route path="/exam/create"        element={<CreateExamPage />} />
-                <Route path="/exam/results/:id"   element={<ResultsPage />} />
-                <Route path="/exam/edit/:id"      element={<EditExamPage />} />
-                <Route path="/exam/:id"           element={<ExamPage />} />
-                <Route path="/exam-finished"      element={<ExamFinishedPage />} />
+                {/* ── Authenticated (with Sidebar) ────────────────────────── */}
+                <Route path="/dashboard"       element={<PrivateRoute><DashboardPage /></PrivateRoute>} />
+                <Route path="/my-applications" element={<PrivateRoute><MyApplicationsPage /></PrivateRoute>} />
+                <Route path="/apply/:driveId"  element={<PrivateRoute><ApplyDrivePage /></PrivateRoute>} />
+                <Route path="/interviews"      element={<PrivateRoute><InterviewsPage /></PrivateRoute>} />
 
-                {/* Room / Interview */}
-                <Route path="/room/create" element={<CreateRoomPage />} />
+                {/* Legacy exam */}
+                <Route path="/exam/create"      element={<PrivateRoute><CreateExamPage /></PrivateRoute>} />
+                <Route path="/exam/edit/:id"    element={<PrivateRoute><EditExamPage /></PrivateRoute>} />
+                <Route path="/exam/results/:id" element={<PrivateRoute><ResultsPage /></PrivateRoute>} />
 
-                {/* ── NEW: Drive System ─────────────────────────── */}
-                <Route path="/drives"            element={<BrowseDrivesPage />} />
-                <Route path="/drive/create"      element={<CreateDrivePage />} />
-                <Route path="/apply/:driveId"    element={<ApplyDrivePage />} />
-                <Route path="/my-applications"   element={<MyApplicationsPage />} />
+                {/* ── Examiner Only ────────────────────────────────────────── */}
+                <Route path="/room/create"   element={<ExaminerRoute><CreateRoomPage /></ExaminerRoute>} />
+                <Route path="/my-drives"     element={<ExaminerRoute><MyDrivesPage /></ExaminerRoute>} />
+                <Route path="/drive/create"  element={<ExaminerRoute><CreateDrivePage /></ExaminerRoute>} />
+
+                {/* Backward compat redirects */}
+                <Route path="/home"       element={<Navigate to="/dashboard" replace />} />
+                <Route path="/drives-old" element={<Navigate to="/drives" replace />} />
+                <Route path="/selection"  element={<Navigate to="/my-drives" replace />} />
+
+                {/* Fallback */}
+                <Route path="*" element={<Navigate to={isAuthenticated ? "/dashboard" : "/"} replace />} />
             </Routes>
         </BrowserRouter>
     )

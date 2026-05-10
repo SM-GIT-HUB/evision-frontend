@@ -1,7 +1,12 @@
 import { Link } from "react-router-dom"
-import { ShieldCheck, Video, Code2, Users, LayoutDashboard, Target, Zap, ChevronRight, CheckCircle2, Award, Sparkles, BrainCircuit, Lock } from "lucide-react"
+import { ShieldCheck, Video, Code2, Target, ChevronRight, Lock, BrainCircuit } from "lucide-react"
 import { useEffect, useState } from "react"
-import { MaskContainer } from "../components/ui/svg-mask-effect"
+import SoftAurora from "../bits/SoftAurora"
+import SplitText from "../bits/SplitText"
+import ShinyText from "../bits/ShinyText"
+import CountUp from "../bits/CountUp"
+import SpotlightCard from "../bits/SpotlightCard"
+import Magnet from "../bits/Magnet"
 
 // --- Custom Cursor Component ---
 function CustomCursor() {
@@ -76,95 +81,103 @@ export default function LandingPage()
         <div className="min-h-screen bg-black text-white font-sans overflow-x-hidden selection:bg-violet-500/30">
             <CustomCursor />
             
-            {/* --- Background Effects --- */}
-            <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-                <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-violet-900/30 blur-[150px] rounded-full mix-blend-screen animate-pulse" style={{ animationDuration: '4s' }}></div>
-                <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-indigo-900/30 blur-[150px] rounded-full mix-blend-screen animate-pulse" style={{ animationDuration: '5s' }}></div>
-                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay"></div>
+            {/* --- Background Effects using Aurora --- */}
+            <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden opacity-50">
+                <SoftAurora 
+                  color1="#6d28d9" 
+                  color2="#312e81" 
+                  speed={0.5} 
+                  brightness={0.8}
+                  enableMouseInteraction={false}
+                />
+                <div className="absolute inset-0 bg-black/40"></div>
+                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.15] mix-blend-overlay"></div>
             </div>
 
-            {/* --- Navbar --- */}
-            <nav className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${scrolled ? 'bg-zinc-950/80 backdrop-blur-lg border-b border-white/5 py-4' : 'bg-transparent py-6'}`}>
-                <div className="max-w-7xl mx-auto px-6 lg:px-12 flex items-center justify-between">
-                    
+            {/* --- Floating Pill Navbar --- */}
+            <div className="fixed top-6 inset-x-0 z-50 flex justify-center px-6">
+                <nav className={`transition-all duration-500 rounded-full flex items-center justify-between px-6 py-3 w-full max-w-5xl ${
+                    scrolled 
+                    ? 'bg-black/40 backdrop-blur-2xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4)]' 
+                    : 'bg-transparent border border-transparent'
+                }`}>
                     <div className="flex items-center gap-3">
-                        <div className="bg-gradient-to-br from-violet-500 to-indigo-600 p-2 rounded-xl text-white shadow-lg shadow-violet-500/20">
+                        <div className="bg-gradient-to-br from-violet-500 to-indigo-600 p-2 rounded-full text-white shadow-lg shadow-violet-500/20">
                             <ShieldCheck size={22} strokeWidth={2.5} />
                         </div>
-                        <span className="text-2xl font-bold tracking-tight text-white">
+                        <span className="text-xl font-bold tracking-tight text-white">
                             EVision
                         </span>
                     </div>
 
-                    <div className="flex items-center gap-6">
-                        <Link to="/login" className="text-sm font-medium text-zinc-300 hover:text-white transition-colors">
+                    <div className="flex items-center gap-8">
+                        <Link to="/login" className="text-sm font-bold tracking-wide text-zinc-300 hover:text-white transition-colors">
                             Sign In
                         </Link>
-                        <Link to="/signup">
-                            <button className="bg-white text-black px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-zinc-200 transition-colors shadow-lg">
+                        <Link to="/signup" className="group">
+                            <button className="bg-white text-black px-6 py-2.5 rounded-full text-sm font-bold tracking-wide hover:bg-zinc-200 transition-all shadow-lg hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:scale-105 active:scale-95">
                                 Get Started
                             </button>
                         </Link>
                     </div>
-                </div>
-            </nav>
+                </nav>
+            </div>
 
             <main className="relative z-10 pt-32 pb-20">
                 
                 {/* --- Hero Section --- */}
                 <section className="px-6 min-h-[85vh] flex flex-col items-center justify-center text-center max-w-6xl mx-auto">
                     
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.03] border border-white/[0.08] backdrop-blur-md mb-8 hover:bg-white/[0.06] transition-colors cursor-default">
-                        <Sparkles size={14} className="text-violet-400" />
-                        <span className="text-xs font-medium text-zinc-300 tracking-wide uppercase">The Future of Tech Hiring</span>
+                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.03] border border-white/10 backdrop-blur-md mb-8 shadow-inner shadow-white/5">
+                        <ShinyText text="✨ NEXT-GEN HIRING PLATFORM" speed={3} className="text-[11px] font-bold tracking-[0.2em] uppercase" />
                     </div>
 
-                    <div className="w-full flex items-center justify-center mb-8 h-[24rem]">
-                        <MaskContainer
-                            revealText={
-                                <h1 className="text-6xl sm:text-7xl lg:text-8xl font-black tracking-tighter leading-[1.1] text-center select-none text-white">
-                                    Hire the top 1% <br />
-                                    <span className="text-zinc-500">
-                                        without the guesswork.
-                                    </span>
-                                </h1>
-                            }
-                            className="rounded-3xl"
-                            size={50}
-                            revealSize={400}
-                        >
-                            <h1 className="text-6xl sm:text-7xl lg:text-8xl font-black tracking-tighter leading-[1.1] text-center select-none text-black">
-                                Hire the top 1% <br />
-                                <span className="text-violet-600">
-                                    without the guesswork.
-                                </span>
-                            </h1>
-                        </MaskContainer>
+                    <div className="w-full flex items-center justify-center mb-8 min-h-[14rem]">
+                        <SplitText 
+                            text="Hire the top 1% without the guesswork."
+                            className="text-6xl sm:text-7xl lg:text-8xl font-black tracking-tighter leading-[1.1] text-center select-none text-white max-w-4xl drop-shadow-2xl"
+                            delay={30}
+                            duration={0.8}
+                        />
                     </div>
 
                     <p className="text-lg sm:text-xl text-zinc-400 max-w-2xl leading-relaxed mb-12 font-medium">
                         Replace fragmented tools with a single, intelligent platform. Conduct secure auto-proctored exams, host live coding interviews, and manage selections seamlessly.
                     </p>
 
-                    <div className="flex flex-col sm:flex-row items-center gap-5">
-                        <Link to="/signup" className="group relative px-8 py-4 rounded-full bg-white text-black font-semibold text-lg overflow-hidden transition-transform hover:scale-105 active:scale-95 shadow-[0_0_40px_rgba(255,255,255,0.2)] hover:shadow-[0_0_60px_rgba(255,255,255,0.4)]">
+                    <div className="flex flex-col sm:flex-row items-center gap-6">
+                        <Link to="/signup" className="group relative px-8 py-4 rounded-full bg-white text-black font-bold text-sm tracking-wide uppercase overflow-hidden transition-all hover:scale-105 active:scale-95 shadow-[0_0_40px_rgba(255,255,255,0.2)] hover:shadow-[0_0_60px_rgba(255,255,255,0.4)]">
                             <div className="relative z-10 flex items-center gap-2">
-                                Start Hiring for Free <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                                Start Hiring for Free <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
                             </div>
                         </Link>
                         
-                        <Link to="/login" className="group px-8 py-4 rounded-full bg-transparent border border-zinc-700 text-white font-semibold text-lg hover:bg-zinc-900 transition-colors">
+                        <Link to="/login" className="group px-8 py-4 rounded-full bg-transparent border border-white/10 text-white font-bold text-sm tracking-wide uppercase hover:bg-white/5 transition-colors backdrop-blur-md">
                             <span className="flex items-center gap-2 text-zinc-300 group-hover:text-white transition-colors">
-                                <Code2 size={18} /> Join an Exam
+                                <Code2 size={16} /> Join an Exam
                             </span>
                         </Link>
                     </div>
 
-                    {/* Scroll Indicator */}
-                    <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-50 animate-bounce">
-                        <span className="text-[10px] uppercase tracking-widest text-zinc-500 font-bold">Scroll</span>
-                        <div className="w-px h-8 bg-gradient-to-b from-zinc-500 to-transparent"></div>
+                    <div className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-8 border-t border-white/10 pt-10 w-full">
+                        <div className="flex flex-col items-center">
+                            <span className="text-3xl font-bold text-white flex items-center"><CountUp to={1200} />+</span>
+                            <span className="text-sm text-zinc-500 mt-1">Candidates</span>
+                        </div>
+                        <div className="flex flex-col items-center">
+                            <span className="text-3xl font-bold text-white flex items-center"><CountUp to={50} />+</span>
+                            <span className="text-sm text-zinc-500 mt-1">Companies</span>
+                        </div>
+                        <div className="flex flex-col items-center">
+                            <span className="text-3xl font-bold text-white flex items-center"><CountUp to={99} />%</span>
+                            <span className="text-sm text-zinc-500 mt-1">Uptime</span>
+                        </div>
+                        <div className="flex flex-col items-center">
+                            <span className="text-3xl font-bold text-white flex items-center"><CountUp to={24} />/7</span>
+                            <span className="text-sm text-zinc-500 mt-1">Support</span>
+                        </div>
                     </div>
+
                 </section>
 
                 {/* --- Bento Grid Features Section --- */}
@@ -178,200 +191,79 @@ export default function LandingPage()
                     </div>
 
                     {/* Bento Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[300px]">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-5 auto-rows-[300px]">
                         
-                        {/* Large Card: Secure Exams */}
-                        <div className="md:col-span-2 md:row-span-2 group relative rounded-3xl bg-zinc-950 border border-white/5 overflow-hidden hover:border-white/10 transition-colors">
-                            <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                            
-                            <div className="absolute inset-0 p-10 flex flex-col justify-end z-10">
-                                <div className="mb-4 bg-emerald-500/20 w-14 h-14 rounded-2xl flex items-center justify-center border border-emerald-500/30">
-                                    <Lock size={26} className="text-emerald-400" />
+                        <SpotlightCard className="md:col-span-2 md:row-span-2 border border-white/5" spotlightColor="rgba(16, 185, 129, 0.08)">
+                            <div className="absolute inset-0 p-12 flex flex-col justify-end z-10 bg-gradient-to-t from-black/80 to-transparent">
+                                <div className="mb-6 bg-emerald-500/10 w-16 h-16 rounded-2xl flex items-center justify-center border border-emerald-500/20 backdrop-blur-xl">
+                                    <Lock size={28} className="text-emerald-400" />
                                 </div>
-                                <h3 className="text-3xl font-bold mb-3">Fort Knox-level Security</h3>
-                                <p className="text-zinc-400 text-lg max-w-md">
+                                <h3 className="text-4xl font-black mb-4 tracking-tight">Fort Knox-level Security</h3>
+                                <p className="text-zinc-400 text-lg max-w-md font-medium leading-relaxed">
                                     AI-powered tab-switching detection, mandatory fullscreen enforcement, and automated submission protocols ensure zero malpractice.
                                 </p>
                             </div>
-                            {/* Abstract Graphic */}
-                            <div className="absolute top-10 right-10 w-64 h-64 bg-emerald-500/20 rounded-full blur-[80px] group-hover:bg-emerald-500/30 transition-colors duration-700"></div>
-                        </div>
+                        </SpotlightCard>
 
-                        {/* Standard Card: Live Coding */}
-                        <div className="group relative rounded-3xl bg-zinc-950 border border-white/5 overflow-hidden hover:border-white/10 transition-colors">
-                            <div className="absolute inset-0 bg-gradient-to-bl from-violet-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                            <div className="absolute inset-0 p-8 flex flex-col">
-                                <div className="bg-violet-500/20 w-12 h-12 rounded-xl flex items-center justify-center border border-violet-500/30 mb-6">
-                                    <Code2 size={22} className="text-violet-400" />
+                        <SpotlightCard className="border border-white/5" spotlightColor="rgba(139, 92, 246, 0.08)">
+                            <div className="absolute inset-0 p-8 flex flex-col z-10 bg-gradient-to-b from-black/40 to-transparent">
+                                <div className="bg-violet-500/10 w-14 h-14 rounded-2xl flex items-center justify-center border border-violet-500/20 mb-6 backdrop-blur-xl">
+                                    <Code2 size={24} className="text-violet-400" />
                                 </div>
-                                <h3 className="text-xl font-bold mb-2">Live Pair Programming</h3>
-                                <p className="text-zinc-400 text-sm">
+                                <h3 className="text-2xl font-black mb-3 tracking-tight">Live Pair Programming</h3>
+                                <p className="text-zinc-400 font-medium leading-relaxed">
                                     Real-time code synchronization powered by Socket.io and Monaco Editor. Code together, flawlessly.
                                 </p>
                             </div>
-                        </div>
+                        </SpotlightCard>
 
-                        {/* Standard Card: WebRTC */}
-                        <div className="group relative rounded-3xl bg-zinc-950 border border-white/5 overflow-hidden hover:border-white/10 transition-colors">
-                            <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                            <div className="absolute inset-0 p-8 flex flex-col justify-end">
-                                <div className="bg-blue-500/20 w-12 h-12 rounded-xl flex items-center justify-center border border-blue-500/30 mb-6">
-                                    <Video size={22} className="text-blue-400" />
+                        <SpotlightCard className="border border-white/5" spotlightColor="rgba(59, 130, 246, 0.08)">
+                            <div className="absolute inset-0 p-8 flex flex-col justify-end z-10 bg-gradient-to-t from-black/60 to-transparent">
+                                <div className="bg-blue-500/10 w-14 h-14 rounded-2xl flex items-center justify-center border border-blue-500/20 mb-6 backdrop-blur-xl">
+                                    <Video size={24} className="text-blue-400" />
                                 </div>
-                                <h3 className="text-xl font-bold mb-2">P2P Video Interviews</h3>
-                                <p className="text-zinc-400 text-sm">
+                                <h3 className="text-2xl font-black mb-3 tracking-tight">P2P Video Interviews</h3>
+                                <p className="text-zinc-400 font-medium leading-relaxed">
                                     Built-in WebRTC video streaming. No external plugins or Zoom links required. Just one click to connect.
                                 </p>
                             </div>
-                        </div>
+                        </SpotlightCard>
 
-                        {/* Standard Card: Smart Evaluation */}
-                        <div className="group relative rounded-3xl bg-zinc-950 border border-white/5 overflow-hidden hover:border-white/10 transition-colors">
-                            <div className="absolute inset-0 bg-gradient-to-bl from-rose-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                            <div className="absolute inset-0 p-8 flex flex-col">
-                                <div className="bg-rose-500/20 w-12 h-12 rounded-xl flex items-center justify-center border border-rose-500/30 mb-6">
-                                    <BrainCircuit size={22} className="text-rose-400" />
+                        <SpotlightCard className="border border-white/5" spotlightColor="rgba(244, 63, 94, 0.08)">
+                            <div className="absolute inset-0 p-8 flex flex-col z-10 bg-gradient-to-b from-black/40 to-transparent">
+                                <div className="bg-rose-500/10 w-14 h-14 rounded-2xl flex items-center justify-center border border-rose-500/20 mb-6 backdrop-blur-xl">
+                                    <BrainCircuit size={24} className="text-rose-400" />
                                 </div>
-                                <h3 className="text-xl font-bold mb-2">Auto Evaluation</h3>
-                                <p className="text-zinc-400 text-sm">
+                                <h3 className="text-2xl font-black mb-3 tracking-tight">Auto Evaluation</h3>
+                                <p className="text-zinc-400 font-medium leading-relaxed">
                                     Instant grading for MCQs and robust tracking. Save hours of manual checking per candidate.
                                 </p>
                             </div>
-                        </div>
+                        </SpotlightCard>
 
-                        {/* Wide Card: Selection Board */}
-                        <div className="md:col-span-2 group relative rounded-3xl bg-zinc-950 border border-white/5 overflow-hidden hover:border-white/10 transition-colors">
-                            <div className="absolute inset-0 bg-gradient-to-tl from-indigo-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                            <div className="absolute inset-0 p-10 flex flex-col justify-center">
-                                <div className="flex items-center gap-4 mb-6">
-                                    <div className="bg-indigo-500/20 w-14 h-14 rounded-2xl flex items-center justify-center border border-indigo-500/30">
-                                        <Target size={26} className="text-indigo-400" />
+                        <SpotlightCard className="md:col-span-2 border border-white/5" spotlightColor="rgba(99, 102, 241, 0.08)">
+                            <div className="absolute inset-0 p-10 flex flex-col justify-center z-10 bg-gradient-to-r from-black/60 to-transparent">
+                                <div className="flex items-center gap-5 mb-6">
+                                    <div className="bg-indigo-500/10 w-16 h-16 rounded-2xl flex items-center justify-center border border-indigo-500/20 backdrop-blur-xl">
+                                        <Target size={28} className="text-indigo-400" />
                                     </div>
-                                    <h3 className="text-3xl font-bold">The Selection Board</h3>
+                                    <h3 className="text-4xl font-black tracking-tight">The Selection Board</h3>
                                 </div>
-                                <p className="text-zinc-400 text-lg max-w-xl">
+                                <p className="text-zinc-400 text-lg max-w-xl font-medium leading-relaxed">
                                     A unified leaderboard aggregating exam scores and interview ratings. Shortlist, reject, or hire with a single click.
                                 </p>
                             </div>
-                            {/* Decorative element */}
-                            <div className="absolute right-0 bottom-0 opacity-10 group-hover:opacity-20 transition-opacity duration-700 pointer-events-none transform translate-x-1/4 translate-y-1/4">
-                                <Award size={300} />
-                            </div>
-                        </div>
+                        </SpotlightCard>
 
-                    </div>
-                </section>
-
-                {/* --- How It Works Section --- */}
-                <section className="py-32 px-6 relative border-t border-white/5 bg-zinc-950/30">
-                    <div className="max-w-7xl mx-auto">
-                        
-                        <div className="text-center mb-24">
-                            <h2 className="text-4xl md:text-5xl font-bold tracking-tight">Designed for both sides of the table.</h2>
-                        </div>
-
-                        <div className="grid md:grid-cols-2 gap-20 items-center">
-                            
-                            {/* Left Side: Content */}
-                            <div className="space-y-12">
-                                
-                                <div className="flex gap-6 group cursor-default">
-                                    <div className="flex-shrink-0 w-12 h-12 rounded-full bg-zinc-900 border border-white/10 flex items-center justify-center group-hover:bg-violet-500/20 group-hover:border-violet-500/50 group-hover:text-violet-400 transition-colors">
-                                        <span className="font-bold">1</span>
-                                    </div>
-                                    <div>
-                                        <h3 className="text-2xl font-bold mb-3">Create & Broadcast</h3>
-                                        <p className="text-zinc-400 leading-relaxed text-lg">
-                                            Examiners define exam parameters (duration, passing marks, MCQs, theory) and paste candidate emails. Our system automatically dispatches OTP-secured invites.
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <div className="flex gap-6 group cursor-default">
-                                    <div className="flex-shrink-0 w-12 h-12 rounded-full bg-zinc-900 border border-white/10 flex items-center justify-center group-hover:bg-indigo-500/20 group-hover:border-indigo-500/50 group-hover:text-indigo-400 transition-colors">
-                                        <span className="font-bold">2</span>
-                                    </div>
-                                    <div>
-                                        <h3 className="text-2xl font-bold mb-3">Proctored Assessment</h3>
-                                        <p className="text-zinc-400 leading-relaxed text-lg">
-                                            Candidates enter the exam. The browser is locked into fullscreen. Leaving the tab triggers warnings and auto-submission protocols.
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <div className="flex gap-6 group cursor-default">
-                                    <div className="flex-shrink-0 w-12 h-12 rounded-full bg-zinc-900 border border-white/10 flex items-center justify-center group-hover:bg-emerald-500/20 group-hover:border-emerald-500/50 group-hover:text-emerald-400 transition-colors">
-                                        <span className="font-bold">3</span>
-                                    </div>
-                                    <div>
-                                        <h3 className="text-2xl font-bold mb-3">Interview & Hire</h3>
-                                        <p className="text-zinc-400 leading-relaxed text-lg">
-                                            Shortlisted candidates join a live WebRTC room with an integrated Monaco code editor. Examiners evaluate in real-time and update the Selection Board.
-                                        </p>
-                                    </div>
-                                </div>
-
-                            </div>
-
-                            {/* Right Side: Visual/Mockup */}
-                            <div className="relative">
-                                {/* Glassmorphic Card Mockup */}
-                                <div className="relative z-10 bg-black/40 backdrop-blur-2xl border border-white/10 rounded-3xl p-6 shadow-2xl transform rotate-2 hover:rotate-0 transition-transform duration-500">
-                                    
-                                    {/* Mockup Header */}
-                                    <div className="flex items-center justify-between border-b border-white/5 pb-4 mb-6">
-                                        <div className="flex items-center gap-3">
-                                            <div className="flex gap-1.5">
-                                                <div className="w-3 h-3 rounded-full bg-red-500/80"></div>
-                                                <div className="w-3 h-3 rounded-full bg-yellow-500/80"></div>
-                                                <div className="w-3 h-3 rounded-full bg-green-500/80"></div>
-                                            </div>
-                                        </div>
-                                        <div className="bg-white/5 px-3 py-1 rounded-full text-xs text-zinc-400 font-mono">
-                                            Selection Board
-                                        </div>
-                                    </div>
-
-                                    {/* Mockup Rows */}
-                                    <div className="space-y-4">
-                                        {[
-                                            { name: "Alice Johnson", score: "92", status: "Selected", color: "text-emerald-400", bg: "bg-emerald-500/20", border: "border-emerald-500/30" },
-                                            { name: "Bob Smith", score: "85", status: "Shortlisted", color: "text-yellow-400", bg: "bg-yellow-500/20", border: "border-yellow-500/30" },
-                                            { name: "Charlie Davis", score: "45", status: "Rejected", color: "text-red-400", bg: "bg-red-500/20", border: "border-red-500/30" },
-                                        ].map((row, i) => (
-                                            <div key={i} className="flex items-center justify-between bg-white/[0.02] border border-white/5 p-4 rounded-2xl">
-                                                <div className="flex items-center gap-4">
-                                                    <div className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center font-bold text-sm text-zinc-400">
-                                                        {row.name.charAt(0)}
-                                                    </div>
-                                                    <div>
-                                                        <div className="font-semibold text-sm">{row.name}</div>
-                                                        <div className="text-xs text-zinc-500 font-mono mt-0.5">Total: {row.score}/100</div>
-                                                    </div>
-                                                </div>
-                                                <div className={`px-3 py-1 rounded-full text-xs font-medium border ${row.bg} ${row.color} ${row.border}`}>
-                                                    {row.status}
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-
-                                </div>
-
-                                {/* Decorative Background Elements */}
-                                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-gradient-to-tr from-violet-600/30 to-blue-600/30 blur-[100px] -z-10 rounded-full"></div>
-                            </div>
-
-                        </div>
                     </div>
                 </section>
 
                 {/* --- Bottom CTA --- */}
-                <section className="py-32 px-6 text-center">
-                    <h2 className="text-4xl md:text-6xl font-bold tracking-tight mb-8">Ready to upgrade your hiring?</h2>
-                    <p className="text-xl text-zinc-400 mb-10">Join examiners using EVision to find the best talent.</p>
+                <section className="py-32 px-6 text-center border-t border-white/5 bg-[#050505]">
+                    <h2 className="text-4xl md:text-6xl font-black tracking-tight mb-6">Ready to upgrade your hiring?</h2>
+                    <p className="text-xl text-zinc-400 mb-10 font-medium">Join examiners using EVision to find the best talent.</p>
                     <Link to="/signup">
-                        <button className="px-10 py-5 rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-bold text-xl hover:scale-105 transition-transform shadow-[0_0_40px_rgba(139,92,246,0.4)]">
+                        <button className="px-10 py-5 rounded-full bg-white text-black font-black tracking-widest uppercase text-sm shadow-[0_0_40px_rgba(255,255,255,0.2)] hover:shadow-[0_0_60px_rgba(255,255,255,0.4)] transition-all hover:scale-105">
                             Create Your First Exam
                         </button>
                     </Link>

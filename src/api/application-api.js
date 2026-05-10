@@ -24,3 +24,8 @@ export async function updateApplicationInterviewScore(id, interviewScore) {
     const response = await api.patch(`/application/${id}/interview-score`, { interviewScore })
     return response.data
 }
+
+export async function inviteCandidates(driveId, emails) {
+    const response = await api.post(`/application/invite/${driveId}`, { emails })
+    return response.data
+}

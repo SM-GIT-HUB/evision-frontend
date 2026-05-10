@@ -1,22 +1,236 @@
 @import "tailwindcss";
 
-html {
-    scroll-behavior: smooth;
+/* ── Design Tokens ─────────────────────────────────────────────────────────── */
+:root {
+    --bg:        #000000;
+    --surface:   #09090b;
+    --card:      #18181b;
+    --border:    #27272a;
+    --border-2:  #3f3f46;
+
+    --primary:      #7c3aed;
+    --primary-h:    #6d28d9;
+    --primary-glow: rgba(124, 58, 237, 0.15);
+
+    --success:  #059669;
+    --warning:  #d97706;
+    --danger:   #dc2626;
+    --info:     #2563eb;
+
+    --text-1: #ffffff;
+    --text-2: #a1a1aa;
+    --text-3: #52525b;
+
+    --sidebar-w: 220px;
+    --radius:    14px;
 }
 
+/* ── Base ──────────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+    scroll-behavior: smooth;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+    background: var(--bg);
+    color: var(--text-1);
+    margin: 0;
+    min-height: 100vh;
+}
+
+/* ── Scrollbar ─────────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: #52525b; }
+
+/* ── Selection ─────────────────────────────────────────────────────────────── */
+::selection { background: rgba(124, 58, 237, 0.3); color: white; }
+
+/* ── Inputs ────────────────────────────────────────────────────────────────── */
 input[type="datetime-local"]::-webkit-calendar-picker-indicator {
     filter: invert(1);
     cursor: pointer;
 }
 
-@layer base {
-    button {
-        cursor: pointer;
-    }
+/* ── App Shell Layout ──────────────────────────────────────────────────────── */
+.app-shell {
+    display: flex;
+    min-height: 100vh;
 }
 
-/* Custom selection */
-::selection {
-    background: rgba(139, 92, 246, 0.3);
-    color: white;
+.app-sidebar {
+    width: var(--sidebar-w);
+    flex-shrink: 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    z-index: 50;
+    overflow-y: auto;
+}
+
+.app-main {
+    /* margin-left: var(--sidebar-w); */
+    flex: 1;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* ── Sidebar Nav Items ─────────────────────────────────────────────────────── */
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 14px;
+    border-radius: 10px;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--text-2);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-decoration: none;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+}
+
+.nav-item:hover {
+    background: rgba(255,255,255,0.05);
+    color: var(--text-1);
+}
+
+.nav-item.active {
+    background: var(--primary-glow);
+    color: #c4b5fd;
+    font-weight: 600;
+}
+
+.nav-item.active .nav-icon {
+    color: #a78bfa;
+}
+
+/* ── Cards ─────────────────────────────────────────────────────────────────── */
+.card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+}
+
+/* ── Buttons ───────────────────────────────────────────────────────────────── */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 16px;
+    border-radius: 10px;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    border: none;
+    white-space: nowrap;
+}
+
+.btn-primary   { background: var(--primary); color: white; }
+.btn-primary:hover { background: var(--primary-h); transform: translateY(-1px); }
+
+.btn-ghost     { background: transparent; color: var(--text-2); border: 1px solid var(--border); }
+.btn-ghost:hover { border-color: var(--border-2); color: var(--text-1); }
+
+.btn-danger    { background: rgba(220,38,38,0.15); color: #f87171; border: 1px solid rgba(220,38,38,0.3); }
+.btn-danger:hover { background: rgba(220,38,38,0.25); }
+
+.btn-sm { padding: 6px 12px; font-size: 12.5px; border-radius: 8px; }
+.btn-lg { padding: 12px 24px; font-size: 15px; border-radius: 12px; }
+
+/* ── Status Badges ─────────────────────────────────────────────────────────── */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 600;
+    border: 1px solid;
+}
+
+.badge-violet  { background: rgba(124,58,237,0.15); color: #c4b5fd; border-color: rgba(124,58,237,0.3); }
+.badge-emerald { background: rgba(5,150,105,0.15);  color: #6ee7b7; border-color: rgba(5,150,105,0.3); }
+.badge-red     { background: rgba(220,38,38,0.12);  color: #fca5a5; border-color: rgba(220,38,38,0.25); }
+.badge-yellow  { background: rgba(217,119,6,0.15);  color: #fcd34d; border-color: rgba(217,119,6,0.3); }
+.badge-blue    { background: rgba(37,99,235,0.15);  color: #93c5fd; border-color: rgba(37,99,235,0.3); }
+.badge-zinc    { background: rgba(63,63,70,0.4);    color: #a1a1aa; border-color: rgba(63,63,70,0.6); }
+
+/* ── Stat Cards ────────────────────────────────────────────────────────────── */
+.stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    transition: border-color 0.2s;
+}
+
+.stat-card:hover { border-color: var(--border-2); }
+
+/* ── Input Fields ──────────────────────────────────────────────────────────── */
+.field-input {
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 11px 14px;
+    font-size: 13.5px;
+    color: var(--text-1);
+    outline: none;
+    transition: border-color 0.15s;
+    font-family: inherit;
+}
+
+.field-input:focus { border-color: rgba(124,58,237,0.5); }
+.field-input::placeholder { color: var(--text-3); }
+
+/* ── Divider ───────────────────────────────────────────────────────────────── */
+.divider { height: 1px; background: var(--border); margin: 8px 0; }
+
+/* ── Animations ────────────────────────────────────────────────────────────── */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in { animation: fadeIn 0.25s ease forwards; }
+
+@keyframes pulse-ring {
+    0%   { box-shadow: 0 0 0 0 rgba(124,58,237,0.4); }
+    70%  { box-shadow: 0 0 0 8px rgba(124,58,237,0); }
+    100% { box-shadow: 0 0 0 0 rgba(124,58,237,0); }
+}
+
+.pulse-ring { animation: pulse-ring 2s infinite; }
+
+/* ── Table ─────────────────────────────────────────────────────────────────── */
+.ev-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.ev-table thead tr { border-bottom: 1px solid var(--border); }
+.ev-table thead th { padding: 11px 16px; text-align: left; color: var(--text-3); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
+.ev-table tbody tr { border-bottom: 1px solid rgba(39,39,42,0.5); transition: background 0.1s; }
+.ev-table tbody tr:hover { background: rgba(255,255,255,0.02); }
+.ev-table tbody td { padding: 13px 16px; color: var(--text-1); }
+
+@layer base {
+    button { cursor: pointer; }
 }
