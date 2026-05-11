@@ -3,9 +3,9 @@ import ExamCard from "./ExamCard"
 function ExamSection({ title, exams, type, role })
 {
     return (
-        <section className="mt-16">
+        <section className="mt-12">
 
-            <h2 className="text-3xl font-bold">
+            <h2 className="text-4xl font-bold tracking-tight">
                 {title}
             </h2>
 
@@ -16,7 +16,14 @@ function ExamSection({ title, exams, type, role })
                 </p>
             }
 
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 mt-6">
+            <div className="
+                grid
+                grid-cols-1
+                lg:grid-cols-2
+                xl:grid-cols-3
+                gap-6
+                mt-8
+            ">
 
                 {
                     exams.map((exam) => (

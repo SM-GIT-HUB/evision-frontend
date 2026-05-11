@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 
 import useAuthStore from "../store/auth-store"
 import { getExamDetails } from "../api/exam-api"
 import ExamSection from "../components/ExamSection"
 import LoadingSpinner from "../components/LoadingSpinner"
 import DashboardHeader from "../components/DashboardHeader"
+import { requestCameraAccess } from "../utils/request-camera-access"
 
 function HomePage()
 {
@@ -17,6 +18,8 @@ function HomePage()
 
     const [upcomingExams, setUpcomingExams] = useState([]);
     const [pastExams, setPastExams] = useState([]);
+
+    const requestedCameraRef = useRef(false);
 
     useEffect(() => {
         localStorage.setItem("selectedExamTab", selectedTab);
@@ -42,13 +45,45 @@ function HomePage()
         fetchExamDetails();
     }, [])
 
+    useEffect(() => {
+        if (!user) {
+            return;
+        }
+
+        if (requestedCameraRef.current) {
+            return;
+        }
+
+        requestedCameraRef.current = true;
+
+        async function requestCameraPermission()
+        {
+            try {
+                await requestCameraAccess();
+            }
+            catch(err) {
+                console.log(
+                    "Camera permission denied",
+                    err
+                )
+            }
+        }
+
+        requestCameraPermission();
+
+    }, [user])
+
     if (loading) {
         return <LoadingSpinner />
     }
 
     return (
-        <div className="min-h-screen bg-black text-white px-6 py-10">
-
+        <div className="
+            min-h-screen
+            bg-black
+            text-white
+            px-5 py-6
+        ">
             <div className="max-w-7xl mx-auto">
 
                 <DashboardHeader

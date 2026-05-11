@@ -264,16 +264,63 @@ function EditExamPage()
     }
 
     return (
-        <div className="min-h-screen bg-black text-white px-6 py-10">
+        <div className="
+            min-h-screen
+            bg-black
+            text-white
+            px-5 py-6
+        ">
 
-            <div className="max-w-5xl mx-auto">
+            <div className="max-w-4xl mx-auto">
 
-                <h1 className="text-5xl font-bold">
-                    Edit Exam
-                </h1>
+                <div className="flex items-center gap-4">
 
-                <div className="flex gap-3 mt-10 flex-wrap">
+                    <div className="
+                        w-12 h-12
+                        rounded-2xl
+                        bg-violet-500/10
+                        border border-violet-500/20
+                        flex items-center justify-center
+                    ">
+                        <div className="
+                            w-4 h-4
+                            rounded-lg
+                            bg-violet-400
+                        " />
+                    </div>
 
+                    <div>
+
+                        <h1 className="
+                            text-3xl
+                            font-bold
+                            tracking-tight
+                        ">
+                            Edit Examination
+                        </h1>
+
+                        <p className="
+                            text-sm
+                            text-zinc-500
+                            mt-1
+                        ">
+                            Manage schedules, candidates and questions.
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <div className="
+                    mt-8
+                    inline-flex
+                    items-center
+                    gap-2
+                    bg-zinc-950
+                    border border-zinc-800
+                    rounded-2xl
+                    p-1.5
+                ">
                     {
                         ["change-time", "add-candidates", "add-question"]
                         .map(type => (
@@ -281,26 +328,52 @@ function EditExamPage()
                             <button
                                 key={type}
                                 onClick={() => setSelectedType(type)}
-                                className={`px-5 py-3 rounded-xl border transition ${
-                                    selectedType === type
-                                    ? "bg-white text-black border-white"
-                                    : "bg-zinc-900 border-zinc-800"
-                                }`}
+                                className={`
+                                    px-4 py-2
+                                    rounded-xl
+                                    text-sm
+                                    font-medium
+                                    transition-all
+                                    capitalize
+                                    ${
+                                        selectedType === type
+                                        ?
+                                        "bg-white text-black"
+                                        :
+                                        "text-zinc-400 hover:text-white"
+                                    }
+                                `}
                             >
-                                {type}
+                                {type.replace("-", " ")}
                             </button>
                         ))
                     }
-
                 </div>
 
                 {
                     selectedType === "change-time" &&
-                    <div className="mt-10 bg-zinc-950 border border-zinc-800 rounded-2xl p-8 space-y-5">
+                    <div className="
+                        mt-10
+                        bg-[#09090B]
+                        border border-zinc-800/80
+                        rounded-2xl
+                        p-5
+                        space-y-4
+                    ">
 
                         <input
                             type="datetime-local"
-                            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none"
+                            className="
+                                w-full
+                                bg-black
+                                border border-zinc-800
+                                rounded-xl
+                                px-4 py-3
+                                outline-none
+                                text-zinc-200
+                                focus:border-violet-500/60
+                                transition
+                            "
                             value={timeData.startTime}
                             onChange={(e) => setTimeData({
                                 ...timeData,
@@ -310,7 +383,17 @@ function EditExamPage()
 
                         <input
                             type="datetime-local"
-                            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none"
+                            className="
+                                w-full
+                                bg-black
+                                border border-zinc-800
+                                rounded-xl
+                                px-4 py-3
+                                outline-none
+                                text-zinc-200
+                                focus:border-violet-500/60
+                                transition
+                            "
                             value={timeData.endTime}
                             onChange={(e) => setTimeData({
                                 ...timeData,
@@ -321,7 +404,16 @@ function EditExamPage()
                         <button
                             onClick={handleChangeTime}
                             disabled={loading}
-                            className="w-full bg-white text-black py-3 rounded-xl font-semibold"
+                            className="
+                                w-full
+                                bg-violet-500
+                                hover:bg-violet-400
+                                text-white
+                                py-4
+                                rounded-xl
+                                font-semibold
+                                transition
+                            "
                         >
                             {
                                 loading ? "Updating..." : "Update Schedule"
@@ -333,12 +425,28 @@ function EditExamPage()
 
                 {
                     selectedType === "add-candidates" &&
-                    <div className="mt-10 bg-zinc-950 border border-zinc-800 rounded-2xl p-8">
+                    <div className="
+                        mt-10
+                        bg-[#09090B]
+                        border border-zinc-800/80
+                        rounded-2xl
+                        p-5
+                    ">
 
                         <textarea
-                            rows={6}
+                            rows={4}
                             placeholder="a@gmail.com, b@gmail.com"
-                            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none resize-none"
+                            className="
+                                w-full
+                                bg-black
+                                border border-zinc-800
+                                rounded-xl
+                                px-4 py-3
+                                outline-none
+                                resize-none
+                                focus:border-emerald-500/60
+                                transition
+                            "
                             value={candidateData}
                             onChange={(e) => setCandidateData(e.target.value)}
                         />
@@ -350,7 +458,17 @@ function EditExamPage()
                         <button
                             onClick={handleAddCandidates}
                             disabled={loading}
-                            className="w-full bg-white text-black py-3 rounded-xl font-semibold mt-6"
+                            className="
+                                w-full
+                                bg-emerald-500
+                                hover:bg-emerald-400
+                                text-black
+                                py-4
+                                rounded-xl
+                                font-semibold
+                                mt-6
+                                transition
+                            "
                         >
                             {
                                 loading ? "Adding..." : "Add Candidates"
@@ -362,24 +480,55 @@ function EditExamPage()
 
                 {
                     selectedType === "add-question" &&
-                    <div className="mt-10 space-y-8">
+                    <div className="mt-10 space-y-7">
 
                         {
                             questions.map((q, index) => (
 
                                 <div
                                     key={index}
-                                    className="bg-zinc-950 border border-zinc-800 rounded-2xl p-5"
+                                    className="
+                                        bg-[#09090B]
+                                        border border-zinc-800/80
+                                        rounded-2xl
+                                        p-5
+                                    "
                                 >
 
-                                    <div className="flex items-center justify-between">
+                                    <div className="
+                                        flex items-center justify-between
+                                        gap-4
+                                    ">
 
-                                        <h2 className="text-lg font-semibold">
-                                            Question {index + 1}
-                                        </h2>
+                                        <div>
+
+                                            <p className="
+                                                text-zinc-500
+                                                text-sm
+                                                mb-1
+                                            ">
+                                                Question
+                                            </p>
+
+                                            <h2 className="
+                                                text-xl
+                                                font-bold
+                                                tracking-tight
+                                            ">
+                                                {index + 1}
+                                            </h2>
+
+                                        </div>
 
                                         <select
-                                            className="bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2 outline-none"
+                                            className="
+                                                bg-black
+                                                border border-zinc-800
+                                                rounded-xl
+                                                px-5 py-3
+                                                outline-none
+                                                text-zinc-200
+                                            "
                                             value={q.type}
                                             onChange={(e) => handleQuestionChange(
                                                 index,
@@ -394,12 +543,23 @@ function EditExamPage()
 
                                     </div>
 
-                                    <div className="mt-4 space-y-3">
+                                    <div className="mt-7 space-y-5">
 
                                         <textarea
-                                            rows={3}
+                                            rows={4}
                                             placeholder="Question Text"
-                                            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none resize-none"
+                                            className="
+                                                w-full
+                                                bg-black
+                                                border border-zinc-800
+                                                rounded-xl
+                                                px-4 py-3
+                                                outline-none
+                                                resize-none
+                                                text-zinc-200
+                                                focus:border-blue-500/60
+                                                transition
+                                            "
                                             value={q.questionText}
                                             onChange={(e) => handleQuestionChange(
                                                 index,
@@ -411,7 +571,17 @@ function EditExamPage()
                                         <input
                                             type="number"
                                             placeholder="Full Score"
-                                            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none"
+                                            className="
+                                                w-full
+                                                bg-black
+                                                border border-zinc-800
+                                                rounded-xl
+                                                px-4 py-3
+                                                outline-none
+                                                text-zinc-200
+                                                focus:border-blue-500/60
+                                                transition
+                                            "
                                             value={q.fullScore}
                                             onChange={(e) => handleQuestionChange(
                                                 index,
@@ -430,8 +600,18 @@ function EditExamPage()
                                                         <input
                                                             key={opIndex}
                                                             type="text"
-                                                            placeholder={`Option ${opIndex}`}
-                                                            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none"
+                                                            placeholder={`Option ${opIndex + 1}`}
+                                                            className="
+                                                                w-full
+                                                                bg-black
+                                                                border border-zinc-800
+                                                                rounded-xl
+                                                                px-4 py-3
+                                                                outline-none
+                                                                text-zinc-200
+                                                                focus:border-blue-500/60
+                                                                transition
+                                                            "
                                                             value={op}
                                                             onChange={(e) => handleOptionChange(
                                                                 index,
@@ -446,8 +626,18 @@ function EditExamPage()
                                                     type="number"
                                                     min={0}
                                                     max={3}
-                                                    placeholder="Choose correct answer index (0 to 3)"
-                                                    className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none"
+                                                    placeholder="Correct Option Index (0 - 3)"
+                                                    className="
+                                                        w-full
+                                                        bg-black
+                                                        border border-zinc-800
+                                                        rounded-xl
+                                                        px-4 py-3
+                                                        outline-none
+                                                        text-zinc-200
+                                                        focus:border-blue-500/60
+                                                        transition
+                                                    "
                                                     value={q.correctOption}
                                                     onChange={(e) => handleQuestionChange(
                                                         index,
@@ -464,7 +654,18 @@ function EditExamPage()
                                             <textarea
                                                 rows={4}
                                                 placeholder="Sample Answer"
-                                                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 outline-none resize-none"
+                                                className="
+                                                    w-full
+                                                    bg-black
+                                                    border border-zinc-800
+                                                    rounded-xl
+                                                    px-4 py-3
+                                                    outline-none
+                                                    resize-none
+                                                    text-zinc-200
+                                                    focus:border-blue-500/60
+                                                    transition
+                                                "
                                                 value={q.sampleAnswer}
                                                 onChange={(e) => handleQuestionChange(
                                                     index,
@@ -483,10 +684,22 @@ function EditExamPage()
                         <button
                             onClick={handleAddQuestions}
                             disabled={loading}
-                            className="w-full bg-white text-black py-4 rounded-2xl font-semibold"
+                            className="
+                                w-full
+                                bg-blue-500
+                                hover:bg-blue-400
+                                text-white
+                                py-3
+                                rounded-xl
+                                text-base
+                                font-semibold
+                                transition-all
+                            "
                         >
                             {
-                                loading ? "Submitting..." : "Submit Questions"
+                                loading
+                                ? "Submitting..."
+                                : "Submit Questions"
                             }
                         </button>
 

@@ -58,21 +58,43 @@ function ExamCard({ exam, type, role })
 
     return (
         <>
-            <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-5 hover:border-zinc-700 transition">
+            <div className="
+                bg-[#09090B]
+                border border-zinc-800/80
+                rounded-[28px]
+                p-6
+                hover:border-zinc-700
+                hover:bg-zinc-950
+                transition-all
+                duration-300
+            ">
 
-                <h2 className="text-xl font-semibold">
+                <h2 className="text-2xl font-bold tracking-tight">
                     {exam.title}
                 </h2>
 
-                <div className="mt-4 space-y-1 text-sm text-zinc-400">
+                <div className="
+                    mt-5
+                    space-y-3
+                    text-sm
+                    text-zinc-500
+                ">
 
-                    <p>
-                        Start: {new Date(exam.startTime).toLocaleString()}
-                    </p>
+                    <div className="flex items-center justify-between">
+                        <span>Start</span>
 
-                    <p>
-                        End: {new Date(exam.endTime).toLocaleString()}
-                    </p>
+                        <span className="text-zinc-300">
+                            {new Date(exam.startTime).toLocaleString()}
+                        </span>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                        <span>End</span>
+
+                        <span className="text-zinc-300">
+                            {new Date(exam.endTime).toLocaleString()}
+                        </span>
+                    </div>
                 </div>
 
                 {
@@ -84,15 +106,15 @@ function ExamCard({ exam, type, role })
                     </p>
                 }
 
-                <div className="mt-5">
+                <div className="mt-7">
 
                     {
                         role === "student" && type === "upcoming" &&
                         <button
                             onClick={() => setShowRules(true)}
                             className="
-                                bg-white text-black px-5 py-3 rounded-xl
-                                font-semibold hover:bg-zinc-200 transition
+                                bg-zinc-100 text-black px-5 py-3 rounded-xl
+                                font-semibold hover:bg-zinc-300 transition
                             "
                         >
                             Start Exam
@@ -118,7 +140,7 @@ function ExamCard({ exam, type, role })
 
                                 navigate(`/exam/edit/${exam._id}`);
                             }}
-                            className="bg-white text-black px-4 py-2 rounded-lg font-medium hover:bg-zinc-200 transition"
+                            className="bg-zinc-100 text-black px-4 py-2 rounded-lg font-medium hover:bg-zinc-300 transition"
                         >
                             Edit Exam
                         </button>
@@ -128,7 +150,7 @@ function ExamCard({ exam, type, role })
                         role === "examiner" && type === "past" &&
                         <button
                             onClick={() => navigate(`/exam/results/${exam._id}`)}
-                            className="bg-white text-black px-5 py-3 rounded-xl font-semibold hover:bg-zinc-200 transition"
+                            className="bg-zinc-100 text-black px-5 py-3 rounded-xl font-semibold hover:bg-zinc-300 transition"
                         >
                             See Results
                         </button>
@@ -207,9 +229,9 @@ function ExamCard({ exam, type, role })
                             <button
                                 onClick={handleStartExam}
                                 className="
-                                    flex-1 bg-white text-black
+                                    flex-1 bg-zinc-100 text-black
                                     py-3 rounded-2xl font-semibold
-                                    hover:bg-zinc-200 transition
+                                    hover:bg-zinc-300 transition
                                 "
                             >
                                 I Understand & Start Exam
