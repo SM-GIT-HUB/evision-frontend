@@ -24,7 +24,6 @@ function App() {
       loadUser();
   }, [setUser])
 
-  console.log(user);
 
   if (loading) {
     return <LoadingSpinner />

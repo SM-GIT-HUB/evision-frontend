@@ -49,3 +49,9 @@ export async function saveAnswers(examId, data)
 
     return response.data;
 }
+
+export async function getMySelectionStatus(examId)
+{
+    const response = await api.get(`/selection/my-status?examId=${examId}`);
+    return response.data;
+}
