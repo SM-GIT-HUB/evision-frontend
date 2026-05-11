@@ -16,6 +16,12 @@ import CreateDrivePage     from "../pages/CreateDrivePage"
 import MyDrivesPage        from "../pages/MyDrivesPage"
 import InterviewsPage      from "../pages/InterviewsPage"
 
+// New Phase 1 pages
+import ResultsAnalyticsPage from "../pages/ResultsAnalyticsPage"
+import AchievementsPage     from "../pages/AchievementsPage"
+import MessagesPage         from "../pages/MessagesPage"
+import CodingPracticePage   from "../pages/CodingPracticePage"
+
 // Legacy exam system
 import CreateExamPage   from "../pages/CreateExamPage"
 import EditExamPage     from "../pages/EditExamPage"
@@ -64,6 +70,19 @@ function AppRoutes() {
                 <Route path="/apply/:driveId"  element={<PrivateRoute><ApplyDrivePage /></PrivateRoute>} />
                 <Route path="/interviews"      element={<PrivateRoute><InterviewsPage /></PrivateRoute>} />
 
+                {/* ── New Phase 1 routes ───────────────────────────────────── */}
+                <Route path="/results"          element={<PrivateRoute><ResultsAnalyticsPage /></PrivateRoute>} />
+                <Route path="/achievements"     element={<PrivateRoute><AchievementsPage /></PrivateRoute>} />
+                <Route path="/messages"         element={<PrivateRoute><MessagesPage /></PrivateRoute>} />
+                <Route path="/coding-practice"  element={<PrivateRoute><CodingPracticePage /></PrivateRoute>} />
+
+                {/* Placeholder routes (Phase 2) */}
+                <Route path="/leaderboard" element={<PrivateRoute><PlaceholderPage title="Leaderboard" icon="🏆" /></PrivateRoute>} />
+                <Route path="/calendar"    element={<PrivateRoute><PlaceholderPage title="Calendar" icon="📅" /></PrivateRoute>} />
+                <Route path="/settings"    element={<PrivateRoute><PlaceholderPage title="Settings" icon="⚙️" /></PrivateRoute>} />
+                <Route path="/help"        element={<PrivateRoute><PlaceholderPage title="Help & Support" icon="💬" /></PrivateRoute>} />
+                <Route path="/profile"     element={<PrivateRoute><PlaceholderPage title="Profile" icon="👤" /></PrivateRoute>} />
+
                 {/* Legacy exam */}
                 <Route path="/exam/create"      element={<PrivateRoute><CreateExamPage /></PrivateRoute>} />
                 <Route path="/exam/edit/:id"    element={<PrivateRoute><EditExamPage /></PrivateRoute>} />
@@ -87,3 +106,13 @@ function AppRoutes() {
 }
 
 export default AppRoutes
+
+function PlaceholderPage({ title, icon }) {
+    return (
+        <div className="flex flex-col items-center justify-center h-full py-32 text-center gap-4">
+            <div className="text-6xl">{icon}</div>
+            <h1 className="text-2xl font-bold text-white">{title}</h1>
+            <p className="text-zinc-500 text-sm max-w-sm">This page is coming in Phase 2. Stay tuned for updates!</p>
+        </div>
+    )
+}

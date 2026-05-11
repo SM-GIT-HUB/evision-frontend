@@ -1,23 +1,33 @@
 import { useState } from "react"
 import { NavLink, useNavigate, useLocation } from "react-router-dom"
 import toast from "react-hot-toast"
-import { LayoutDashboard, Building2, Video, BarChart2, LogOut, ShieldCheck, Plus, Menu, X, Inbox } from "lucide-react"
+import { LayoutDashboard, Building2, Video, BarChart2, LogOut, ShieldCheck, Plus, Inbox, Trophy, Code2, CalendarDays, MessageSquare, Star, Settings, HelpCircle } from "lucide-react"
 import useAuthStore from "../store/auth-store"
 import { logout } from "../api/auth-api"
 import { motion, AnimatePresence } from "motion/react"
 import ClickSpark from "../bits/ClickSpark"
 
 const EXAMINER_NAV = [
-    { to: "/dashboard",  label: "Dashboard",  icon: LayoutDashboard },
-    { to: "/my-drives",  label: "Drive Management",  icon: Building2 },
-    { to: "/interviews", label: "Interviews", icon: Video },
-    { to: "/selection",  label: "Selection Board",  icon: BarChart2 },
+    { to: "/dashboard",   label: "Dashboard",        icon: LayoutDashboard },
+    { to: "/my-drives",   label: "Drive Management", icon: Building2 },
+    { to: "/interviews",  label: "Interviews",        icon: Video },
+    { to: "/selection",   label: "Selection Board",   icon: BarChart2 },
 ]
 
 const STUDENT_NAV = [
-    { to: "/dashboard",       label: "Dashboard",       icon: LayoutDashboard },
-    { to: "/my-applications", label: "My Assessments", icon: Inbox },
-    { to: "/interviews",      label: "Interviews",      icon: Video },
+    { to: "/dashboard",       label: "Dashboard",          icon: LayoutDashboard },
+    { to: "/my-applications", label: "My Assessments",     icon: Inbox },
+    { to: "/interviews",      label: "Interviews",          icon: Video },
+    { to: "/coding-practice", label: "Coding Practice",    icon: Code2 },
+    { to: "/calendar",        label: "Calendar",            icon: CalendarDays },
+    { to: "/messages",        label: "Messages",            icon: MessageSquare },
+]
+
+const STUDENT_BOTTOM_NAV = [
+    { to: "/leaderboard",  label: "Leaderboard",  icon: Trophy },
+    { to: "/achievements", label: "Achievements", icon: Star },
+    { to: "/help",         label: "Help & Support", icon: HelpCircle },
+    { to: "/settings",     label: "Settings",     icon: Settings },
 ]
 
 export default function Sidebar() {
@@ -84,10 +94,10 @@ export default function Sidebar() {
             )}
 
             {/* ── Nav Items ── */}
-            <nav className="flex-1 px-3 py-4 space-y-2 overflow-y-auto overflow-x-hidden">
+            <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto overflow-x-hidden">
                 {navItems.map(item => {
                     const Icon = item.icon
-                    const isActive = location.pathname.startsWith(item.to)
+                    const isActive = location.pathname === item.to
                     return (
                         <NavLink
                             key={item.to}
@@ -113,7 +123,55 @@ export default function Sidebar() {
                         </NavLink>
                     )
                 })}
+
+                {/* OTHER section for students */}
+                {!isExaminer && (
+                    <>
+                        <motion.p
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: open ? 1 : 0 }}
+                            className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest px-3.5 pt-4 pb-1"
+                        >
+                            Other
+                        </motion.p>
+                        {STUDENT_BOTTOM_NAV.map(item => {
+                            const Icon = item.icon
+                            const isActive = location.pathname === item.to
+                            return (
+                                <NavLink
+                                    key={item.to}
+                                    to={item.to}
+                                    className={`
+                                        relative flex items-center gap-4 px-3.5 py-2.5 rounded-xl font-medium text-sm transition-all whitespace-nowrap group
+                                        ${isActive ? "text-white bg-white/10" : "text-zinc-600 hover:text-zinc-300 hover:bg-white/5"}
+                                    `}
+                                >
+                                    <Icon size={18} className={`shrink-0 ${isActive ? "text-white" : "text-zinc-600 group-hover:text-zinc-400"}`} />
+                                    <motion.span initial={{ opacity: 0 }} animate={{ opacity: open ? 1 : 0 }}>
+                                        {item.label}
+                                    </motion.span>
+                                </NavLink>
+                            )
+                        })}
+                    </>
+                )}
             </nav>
+
+            {/* ── Upgrade to Pro ── */}
+            {!isExaminer && open && (
+                <div className="px-4 py-3 shrink-0">
+                    <div className="rounded-2xl bg-gradient-to-br from-violet-600/20 to-yellow-500/10 border border-violet-500/20 p-4">
+                        <div className="flex items-center gap-2 mb-1">
+                            <span className="text-yellow-400">⭐</span>
+                            <span className="text-xs font-bold text-white">Upgrade to Pro</span>
+                        </div>
+                        <p className="text-[10px] text-zinc-400 mb-3 leading-relaxed">Unlock advanced analytics and premium features.</p>
+                        <button className="w-full py-2 bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold rounded-xl transition-colors">
+                            Upgrade Now →
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* ── User Footer ── */}
             <div className="p-4 mt-auto shrink-0 border-t border-white/5 bg-black/20 whitespace-nowrap overflow-hidden">
@@ -123,7 +181,7 @@ export default function Sidebar() {
                     </div>
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: open ? 1 : 0 }} className="flex flex-col">
                         <span className="text-sm font-bold text-white">{user?.name || "User"}</span>
-                        <span className="text-xs font-mono text-zinc-500">{user?.role}</span>
+                        <span className="text-xs font-mono text-zinc-500 capitalize">{user?.role}</span>
                     </motion.div>
                 </div>
 

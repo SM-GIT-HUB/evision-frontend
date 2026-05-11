@@ -1,8 +1,9 @@
 import toast from "react-hot-toast"
 import { logout } from "../api/auth-api"
-import { ShieldCheck, GraduationCap, Video, BarChart2, Plus, Building2, LayoutDashboard } from "lucide-react"
+import { ShieldCheck, Video, BarChart2, Plus, Building2, LayoutDashboard } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import useAuthStore from "../store/auth-store"
+import NotificationCenter from "./NotificationCenter"
 
 function DashboardHeader({ user, selectedTab, setSelectedTab })
 {
@@ -48,6 +49,7 @@ function DashboardHeader({ user, selectedTab, setSelectedTab })
 
                 {/* Actions */}
                 <div className="flex items-center gap-2 flex-wrap">
+                    <NotificationCenter />
                     {isExaminer ? (
                         <>
                             <button onClick={() => navigate("/exam/create")}
