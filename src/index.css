@@ -234,3 +234,26 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator {
 @layer base {
     button { cursor: pointer; }
 }
+
+/* ── Custom Excalidraw Overrides ───────────────────────────────────────────── */
+.custom-excalidraw {
+    background-color: #000000 !important;
+}
+
+.custom-excalidraw .excalidraw {
+    --view-background-color: #000000 !important;
+    background-color: #000000 !important;
+}
+
+.custom-excalidraw .excalidraw-container {
+    background-color: #000000 !important;
+}
+
+.custom-excalidraw .excalidraw.theme--light {
+    --view-background-color: #000000 !important;
+    --popup-secondary-background-color: #121212 !important;
+    --button-hover-bg: #222222 !important;
+    --card-color: #121212 !important;
+    --icon-fill-color: #ffffff !important;
+    --text-color: #ffffff !important;
+}

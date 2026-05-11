@@ -23,6 +23,8 @@ import ResultsPage      from "../pages/ResultsPage"
 import ExamFinishedPage from "../pages/ExamFinishedPage"
 import ExamPage         from "../features/exam/pages/ExamPage"
 import CreateRoomPage   from "../pages/CreateRoomPage"
+import RoomPage         from "../pages/RoomPage"
+import RoomFinishedPage from "../pages/RoomFinishedPage"
 
 function PrivateRoute({ children }) {
     const { isAuthenticated } = useAuthStore()
@@ -51,6 +53,10 @@ function AppRoutes() {
                 {/* ── Exam (no shell — fullscreen) ────────────────────────── */}
                 <Route path="/exam/:id"        element={<ExamPage />} />
                 <Route path="/exam-finished"   element={<ExamFinishedPage />} />
+                
+                {/* ── Room (no shell — fullscreen) ────────────────────────── */}
+                <Route path="/room/:roomId"    element={<RoomPage />} />
+                <Route path="/room-finished"   element={<RoomFinishedPage />} />
 
                 {/* ── Authenticated (with Sidebar) ────────────────────────── */}
                 <Route path="/dashboard"       element={<PrivateRoute><DashboardPage /></PrivateRoute>} />

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 import { Video, Calendar, Clock, User, ExternalLink, Loader2 } from "lucide-react"
 import useAuthStore from "../store/auth-store"
 import { getMyRooms } from "../api/room-api"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, Link } from "react-router-dom"
 
 export default function InterviewsPage() {
     const { user } = useAuthStore()
@@ -102,11 +102,11 @@ function RoomCard({ room, isUpcoming, navigate }) {
                     </div>
                 </div>
 
-                {isUpcoming && room._id && (
-                    <a href={`http://localhost:5174/room/${room._id}`} target="_blank" rel="noreferrer"
+                {isUpcoming && room.roomId && (
+                    <Link to={`/room/${room.roomId}`}
                         className="btn btn-primary btn-sm" style={{ flexShrink:0 }}>
                         Join <ExternalLink size={12} />
-                    </a>
+                    </Link>
                 )}
             </div>
         </div>
