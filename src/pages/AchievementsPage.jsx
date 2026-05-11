@@ -28,7 +28,7 @@ export default function AchievementsPage() {
     const locked   = items.filter(a => !a.unlocked)
 
     return (
-        <div className="p-8 max-w-5xl mx-auto space-y-8 animate-in fade-in duration-500">
+        <div className="p-8 w-full max-w-6xl animate-in fade-in duration-500 space-y-8">
             <div>
                 <h1 className="text-2xl font-bold text-white">Achievements</h1>
                 <p className="text-zinc-400 text-sm mt-1">Complete assessments and interviews to unlock badges.</p>

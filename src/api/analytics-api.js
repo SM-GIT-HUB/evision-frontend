@@ -9,3 +9,8 @@ export async function getDashboardData() {
     const response = await api.get("/analytics/dashboard")
     return response.data
 }
+
+export async function getGlobalLeaderboard() {
+    const response = await api.get("/analytics/leaderboard")
+    return response.data
+}

@@ -105,12 +105,22 @@ function ApplicationCard({ app }) {
                         <Clock size={12} /> Applied on {new Date(app.appliedAt).toLocaleDateString("en-IN", { day:"numeric", month:"short", year:"numeric" })}
                     </p>
                 </div>
-                <div className={`px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap border shadow-sm ${
-                    app.status === 'selected' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
-                    app.status === 'rejected' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
-                    'bg-violet-500/10 text-violet-400 border-violet-500/20'
-                }`}>
-                    {cfg.label}
+                <div className="flex flex-col items-end gap-2">
+                    <div className={`px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap border shadow-sm ${
+                        app.status === 'selected' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+                        app.status === 'rejected' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
+                        'bg-violet-500/10 text-violet-400 border-violet-500/20'
+                    }`}>
+                        {cfg.label}
+                    </div>
+                    {app.status === "exam_invited" && (
+                        <Link 
+                            to={`/coding-assessment/${app.driveId?._id || app.driveId}`}
+                            className="bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold px-4 py-1.5 rounded-lg transition-colors shadow-[0_0_15px_rgba(124,58,237,0.3)]"
+                        >
+                            Start Exam
+                        </Link>
+                    )}
                 </div>
             </div>
 

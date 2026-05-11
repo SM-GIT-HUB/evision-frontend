@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import toast from "react-hot-toast"
-import { Building2, ChevronRight, Loader2, CheckCircle2, ChevronLeft, Filter, Users, CalendarDays, Lock, Trophy } from "lucide-react"
-import { getMyDrives, getDriveApplications, scheduleExam, closeExam, finalizeDrive } from "../api/drive-api"
+import { Building2, ChevronRight, Loader2, CheckCircle2, ChevronLeft, Filter, Users, CalendarDays, Lock as LockIcon, Trophy, X as CloseIcon, XCircle as XCircleIcon } from "lucide-react"
+import { getMyDrives, getDriveApplications, scheduleExam, closeExam, finalizeDrive, terminateCandidate } from "../api/drive-api"
 import { inviteCandidates } from "../api/application-api"
 import SpotlightCard from "../bits/SpotlightCard"
 import CountUp from "../bits/CountUp"
@@ -40,6 +40,7 @@ export default function MyDrivesPage() {
     const [actionBusy, setActionBusy] = useState(null)
     const [inviteEmails, setInviteEmails] = useState("")
     const [inviteLoading, setInviteLoading] = useState(false)
+    const [selectedApp, setSelectedApp] = useState(null)
 
     useEffect(() => { load() }, [])
 
@@ -62,16 +63,19 @@ export default function MyDrivesPage() {
         finally { setAppsLoading(false) }
     }
 
-    async function doAction(id, action) {
+    async function doAction(id, action, extra = null) {
         setActionBusy(action)
         try {
             if (action === "schedule-exam") await scheduleExam(id)
             if (action === "close-exam")    await closeExam(id)
             if (action === "finalize")      await finalizeDrive(id)
+            if (action === "terminate")     {
+                await terminateCandidate(selected._id, extra)
+                setSelectedApp(null)
+            }
             toast.success("Action successful!")
             await load()
-            const updated = (await getMyDrives()).data?.find(d => d._id === id)
-            if (updated) { setSelected(updated); openDrive(updated) }
+            if (selected) openDrive(selected)
         } catch (err) { toast.error(err.response?.data?.message || "Failed to execute action") }
         finally { setActionBusy(null) }
     }
@@ -195,7 +199,7 @@ export default function MyDrivesPage() {
                                 <ActionBtn icon={<CalendarDays size={16}/>} label="Schedule Exam" busy={actionBusy === "schedule-exam"} onClick={() => doAction(selected._id, "schedule-exam")} variant="blue" />
                             )}
                             {selected.status === "exam_scheduled" && (
-                                <ActionBtn icon={<Lock size={16}/>} label="Close Exam & Shortlist" busy={actionBusy === "close-exam"} onClick={() => doAction(selected._id, "close-exam")} variant="violet" />
+                                <ActionBtn icon={<LockIcon size={16}/>} label="Close Exam & Shortlist" busy={actionBusy === "close-exam"} onClick={() => doAction(selected._id, "close-exam")} variant="violet" />
                             )}
                             {selected.status === "interviewing" && (
                                 <ActionBtn icon={<Trophy size={16}/>} label="Finalize Selection" busy={actionBusy === "finalize"} onClick={() => doAction(selected._id, "finalize")} variant="emerald" />
@@ -279,7 +283,7 @@ export default function MyDrivesPage() {
                                 </thead>
                                 <tbody className="divide-y divide-white/5">
                                     {filteredApps.map((app) => (
-                                        <tr key={app._id} className={`hover:bg-white/[0.02] transition-colors ${app.status === "selected" ? "bg-emerald-500/[0.02]" : ""}`}>
+                                        <tr key={app._id} onClick={() => setSelectedApp(app)} className={`cursor-pointer hover:bg-white/[0.02] transition-colors ${app.status === "selected" ? "bg-emerald-500/[0.02]" : ""}`}>
                                             <td className="px-6 py-4">
                                                 <p className="font-bold text-white">{app.personalInfo?.fullName}</p>
                                                 <p className="text-[11px] font-mono text-zinc-500 mt-1">{app.candidateId?.email}</p>
@@ -310,6 +314,91 @@ export default function MyDrivesPage() {
                         </div>
                     )}
                 </>
+            )}
+
+            {/* Candidate Details Modal */}
+            {selectedApp && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+                    <div className="bg-[#09090b] border border-white/10 w-full max-w-2xl rounded-[2.5rem] overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+                        <div className="p-8 overflow-y-auto">
+                            <div className="flex justify-between items-start mb-8">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-16 h-16 rounded-full bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-2xl font-black text-violet-400">
+                                        {selectedApp.personalInfo?.fullName[0]}
+                                    </div>
+                                    <div>
+                                        <h2 className="text-2xl font-black text-white">{selectedApp.personalInfo?.fullName}</h2>
+                                        <div className="flex items-center gap-3 mt-1">
+                                            <p className="text-zinc-500 font-medium text-sm">{selectedApp.candidateId?.email}</p>
+                                            <span className="w-1 h-1 rounded-full bg-zinc-700"></span>
+                                            <p className="text-zinc-500 font-medium text-sm">{selectedApp.personalInfo?.phone || "No phone"}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button onClick={() => setSelectedApp(null)} className="p-2 hover:bg-white/5 rounded-full text-zinc-500 transition-colors">
+                                    <CloseIcon size={24} />
+                                </button>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-8 mb-8">
+                                <div>
+                                    <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest mb-3">Education</p>
+                                    <div className="space-y-2">
+                                        <p className="text-sm font-bold text-zinc-300">{selectedApp.personalInfo?.college}</p>
+                                        <p className="text-xs text-zinc-500">{selectedApp.personalInfo?.branch}</p>
+                                        <p className="text-xs font-mono text-violet-400 font-bold">CGPA: {selectedApp.personalInfo?.cgpa} | Year: {selectedApp.personalInfo?.passingYear}</p>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest mb-3">Scores & Status</p>
+                                    <div className="space-y-2">
+                                        <div className="flex justify-between text-xs">
+                                            <span className="text-zinc-500">Status</span>
+                                            <span className={`font-bold uppercase tracking-wider ${APP_STATUS[selectedApp.status]}`}>{selectedApp.status?.replace(/_/g," ")}</span>
+                                        </div>
+                                        <div className="flex justify-between text-xs">
+                                            <span className="text-zinc-500">Exam Score</span>
+                                            <span className="text-white font-bold">{selectedApp.examScore ?? "N/A"}</span>
+                                        </div>
+                                        <div className="flex justify-between text-xs">
+                                            <span className="text-zinc-500">Interview Score</span>
+                                            <span className="text-violet-400 font-bold">{selectedApp.interviewScore ?? "N/A"}</span>
+                                        </div>
+                                        <div className="flex justify-between text-xs">
+                                            <span className="text-zinc-500">Applied On</span>
+                                            <span className="text-zinc-400 font-bold">{new Date(selectedApp.appliedAt).toLocaleDateString()}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest mb-3">Skills</p>
+                                <div className="flex flex-wrap gap-2">
+                                    {selectedApp.personalInfo?.skills?.map(s => (
+                                        <span key={s} className="px-3 py-1 bg-white/5 border border-white/10 rounded-lg text-xs font-semibold text-zinc-400">{s}</span>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="p-6 bg-white/[0.02] border-t border-white/5 flex gap-4">
+                            <button className="flex-1 py-3 bg-white/5 border border-white/10 rounded-2xl text-sm font-bold text-white hover:bg-white/10 transition-colors">
+                                View Resume
+                            </button>
+                            {["exam_invited", "exam_scheduled", "applied"].includes(selectedApp.status) && (
+                                <button 
+                                    onClick={() => doAction(selectedApp._id, "terminate", selectedApp.candidateId?._id)}
+                                    disabled={actionBusy === "terminate"}
+                                    className="flex-1 py-3 bg-red-500/10 border border-red-500/20 rounded-2xl text-sm font-bold text-red-500 hover:bg-red-500/20 transition-colors flex justify-center items-center gap-2"
+                                >
+                                    {actionBusy === "terminate" ? <Loader2 size={16} className="animate-spin" /> : <XCircleIcon size={18} />}
+                                    Terminate Access
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     )

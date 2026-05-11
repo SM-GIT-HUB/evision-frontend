@@ -21,7 +21,13 @@ const EMPTY_Q = () => ({
     options: ["", "", "", ""],
     correctOption: 0,
     sampleAnswer: "",
-    fullScore: ""
+    fullScore: "",
+    // Coding specific
+    difficulty: "Medium",
+    examples: [{ input: "", output: "", explanation: "" }],
+    testCases: [{ input: "", expected: "" }],
+    hints: [""],
+    starterCode: { javascript: "", python: "", java: "", cpp: "" }
 })
 
 export default function CreateDrivePage() {
@@ -89,6 +95,37 @@ export default function CreateDrivePage() {
         })
     }
 
+    function setCodingArray(qIdx, field, subIdx, subField, value) {
+        setQuestions(prev => {
+            const updated = [...prev]
+            const arr = [...updated[qIdx][field]]
+            if (subField === null) {
+                arr[subIdx] = value
+            } else {
+                arr[subIdx] = { ...arr[subIdx], [subField]: value }
+            }
+            updated[qIdx] = { ...updated[qIdx], [field]: arr }
+            return updated
+        })
+    }
+
+    function addCodingArrayItem(qIdx, field, emptyObj) {
+        setQuestions(prev => {
+            const updated = [...prev]
+            updated[qIdx] = { ...updated[qIdx], [field]: [...updated[qIdx][field], emptyObj] }
+            return updated
+        })
+    }
+
+    function removeCodingArrayItem(qIdx, field, subIdx) {
+        setQuestions(prev => {
+            const updated = [...prev]
+            if (updated[qIdx][field].length <= 1) return prev
+            updated[qIdx] = { ...updated[qIdx], [field]: updated[qIdx][field].filter((_, i) => i !== subIdx) }
+            return updated
+        })
+    }
+
     function addQuestion() {
         setQuestions(prev => [...prev, EMPTY_Q()])
     }
@@ -114,6 +151,15 @@ export default function CreateDrivePage() {
                 }
                 if (q.type === "theory" && !q.sampleAnswer.trim()) {
                     return toast.error(`Question ${i + 1}: sample answer required`)
+                }
+                if (q.type === "coding") {
+                    if (!q.difficulty) return toast.error(`Question ${i + 1}: difficulty is required`)
+                    if (q.examples.some(ex => !ex.input.trim() || !ex.output.trim())) {
+                        return toast.error(`Question ${i + 1}: all examples must have input and output`)
+                    }
+                    if (q.testCases.some(tc => !tc.input.trim() || !tc.expected.trim())) {
+                        return toast.error(`Question ${i + 1}: all test cases must have input and expected output`)
+                    }
                 }
             }
         }
@@ -162,7 +208,12 @@ export default function CreateDrivePage() {
                 fullScore: Number(q.fullScore),
                 options: q.type === "mcq" ? q.options : undefined,
                 correctOption: q.type === "mcq" ? Number(q.correctOption) : undefined,
-                sampleAnswer: q.type === "theory" ? q.sampleAnswer.trim() : undefined
+                sampleAnswer: q.type === "theory" ? q.sampleAnswer.trim() : undefined,
+                difficulty: q.type === "coding" ? q.difficulty : undefined,
+                examples: q.type === "coding" ? q.examples.filter(e => e.input && e.output) : undefined,
+                testCases: q.type === "coding" ? q.testCases.filter(t => t.input && t.expected) : undefined,
+                hints: q.type === "coding" ? q.hints.filter(h => h.trim()) : undefined,
+                starterCode: q.type === "coding" ? q.starterCode : undefined
             }))
 
             await addDriveQuestions(driveId, formattedQs)
@@ -317,7 +368,10 @@ export default function CreateDrivePage() {
                             </div>
 
                             {questions.map((q, idx) => (
-                                <QuestionCard key={idx} q={q} idx={idx} onUpdate={setQ} onOptionUpdate={setOption} onRemove={removeQuestion} />
+                                <QuestionCard 
+                                    key={idx} q={q} idx={idx} onUpdate={setQ} onOptionUpdate={setOption} onRemove={removeQuestion}
+                                    setCodingArray={setCodingArray} addCodingArrayItem={addCodingArrayItem} removeCodingArrayItem={removeCodingArrayItem}
+                                />
                             ))}
                         </div>
                     )}
@@ -394,7 +448,10 @@ export default function CreateDrivePage() {
 }
 
 // ── Question Card ──────────────────────────────────────────────────────────────
-function QuestionCard({ q, idx, onUpdate, onOptionUpdate, onRemove }) {
+function QuestionCard({ 
+    q, idx, onUpdate, onOptionUpdate, onRemove,
+    setCodingArray, addCodingArrayItem, removeCodingArrayItem 
+}) {
     const [collapsed, setCollapsed] = useState(false)
 
     return (
@@ -461,6 +518,72 @@ function QuestionCard({ q, idx, onUpdate, onOptionUpdate, onRemove }) {
                             <textarea rows={3} placeholder="Ideal answer / key points..."
                                 value={q.sampleAnswer} onChange={e => onUpdate(idx, "sampleAnswer", e.target.value)}
                                 className={inputCls + " resize-none"} />
+                        </div>
+                    )}
+
+                    {q.type === "coding" && (
+                        <div style={{ marginTop:14, display: "flex", flexDirection: "column", gap: 16 }}>
+                            <div>
+                                <p style={{ fontSize:11, color:"var(--text-3)", textTransform:"uppercase", letterSpacing:"0.06em", margin:"0 0 8px", fontWeight:600 }}>Difficulty</p>
+                                <select value={q.difficulty} onChange={e => onUpdate(idx, "difficulty", e.target.value)} className={inputCls} style={{ width: 140 }}>
+                                    <option value="Easy">Easy</option>
+                                    <option value="Medium">Medium</option>
+                                    <option value="Hard">Hard</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                                    <p style={{ fontSize:11, color:"var(--text-3)", textTransform:"uppercase", letterSpacing:"0.06em", margin: 0, fontWeight:600 }}>Examples</p>
+                                    <button onClick={() => addCodingArrayItem(idx, "examples", { input: "", output: "", explanation: "" })} className="text-[10px] text-violet-400 font-bold hover:underline">+ Add Example</button>
+                                </div>
+                                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                                    {q.examples.map((ex, exIdx) => (
+                                        <div key={exIdx} style={{ padding: 12, background: "rgba(255,255,255,0.03)", borderRadius: 8, border: "1px solid var(--border)" }}>
+                                            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                                                <span style={{ fontSize: 10, fontWeight: 700, color: "var(--text-3)" }}>Example {exIdx + 1}</span>
+                                                <button onClick={() => removeCodingArrayItem(idx, "examples", exIdx)} className="text-red-500/50 hover:text-red-500"><Trash2 size={12} /></button>
+                                            </div>
+                                            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                                                <input placeholder="Input" value={ex.input} onChange={e => setCodingArray(idx, "examples", exIdx, "input", e.target.value)} className={inputCls} />
+                                                <input placeholder="Output" value={ex.output} onChange={e => setCodingArray(idx, "examples", exIdx, "output", e.target.value)} className={inputCls} />
+                                                <input placeholder="Explanation (Optional)" value={ex.explanation} onChange={e => setCodingArray(idx, "examples", exIdx, "explanation", e.target.value)} className={inputCls} />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div>
+                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                                    <p style={{ fontSize:11, color:"var(--text-3)", textTransform:"uppercase", letterSpacing:"0.06em", margin: 0, fontWeight:600 }}>Hidden Test Cases</p>
+                                    <button onClick={() => addCodingArrayItem(idx, "testCases", { input: "", expected: "" })} className="text-[10px] text-violet-400 font-bold hover:underline">+ Add Test Case</button>
+                                </div>
+                                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                                    {q.testCases.map((tc, tcIdx) => (
+                                        <div key={tcIdx} style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                                            <input placeholder="Input" value={tc.input} onChange={e => setCodingArray(idx, "testCases", tcIdx, "input", e.target.value)} className={inputCls} style={{ flex: 1 }} />
+                                            <input placeholder="Expected Output" value={tc.expected} onChange={e => setCodingArray(idx, "testCases", tcIdx, "expected", e.target.value)} className={inputCls} style={{ flex: 1 }} />
+                                            <button onClick={() => removeCodingArrayItem(idx, "testCases", tcIdx)} className="text-red-500/50 hover:text-red-500"><Trash2 size={14} /></button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div>
+                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                                    <p style={{ fontSize:11, color:"var(--text-3)", textTransform:"uppercase", letterSpacing:"0.06em", margin: 0, fontWeight:600 }}>Hints</p>
+                                    <button onClick={() => addCodingArrayItem(idx, "hints", "")} className="text-[10px] text-violet-400 font-bold hover:underline">+ Add Hint</button>
+                                </div>
+                                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                                    {q.hints.map((hint, hIdx) => (
+                                        <div key={hIdx} style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                                            <input placeholder={`Hint ${hIdx + 1}`} value={hint} onChange={e => setCodingArray(idx, "hints", hIdx, null, e.target.value)} className={inputCls} style={{ flex: 1 }} />
+                                            <button onClick={() => removeCodingArrayItem(idx, "hints", hIdx)} className="text-red-500/50 hover:text-red-500"><Trash2 size={14} /></button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
                         </div>
                     )}
 

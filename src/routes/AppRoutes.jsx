@@ -22,6 +22,14 @@ import AchievementsPage     from "../pages/AchievementsPage"
 import MessagesPage         from "../pages/MessagesPage"
 import CodingPracticePage   from "../pages/CodingPracticePage"
 
+// Phase 2 pages
+import LeaderboardPage      from "../pages/LeaderboardPage"
+import SettingsPage         from "../pages/SettingsPage"
+import HelpPage             from "../pages/HelpPage"
+
+// Assessment pages
+import CodingAssessmentPage from "../features/exam/pages/CodingAssessmentPage"
+
 // Legacy exam system
 import CreateExamPage   from "../pages/CreateExamPage"
 import EditExamPage     from "../pages/EditExamPage"
@@ -31,6 +39,7 @@ import ExamPage         from "../features/exam/pages/ExamPage"
 import CreateRoomPage   from "../pages/CreateRoomPage"
 import RoomPage         from "../pages/RoomPage"
 import RoomFinishedPage from "../pages/RoomFinishedPage"
+import LiveProctoringPage from "../pages/LiveProctoringPage"
 
 function PrivateRoute({ children }) {
     const { isAuthenticated } = useAuthStore()
@@ -71,17 +80,18 @@ function AppRoutes() {
                 <Route path="/interviews"      element={<PrivateRoute><InterviewsPage /></PrivateRoute>} />
 
                 {/* ── New Phase 1 routes ───────────────────────────────────── */}
-                <Route path="/results"          element={<PrivateRoute><ResultsAnalyticsPage /></PrivateRoute>} />
                 <Route path="/achievements"     element={<PrivateRoute><AchievementsPage /></PrivateRoute>} />
                 <Route path="/messages"         element={<PrivateRoute><MessagesPage /></PrivateRoute>} />
                 <Route path="/coding-practice"  element={<PrivateRoute><CodingPracticePage /></PrivateRoute>} />
 
-                {/* Placeholder routes (Phase 2) */}
-                <Route path="/leaderboard" element={<PrivateRoute><PlaceholderPage title="Leaderboard" icon="🏆" /></PrivateRoute>} />
+                {/* Phase 2 pages */}
                 <Route path="/calendar"    element={<PrivateRoute><PlaceholderPage title="Calendar" icon="📅" /></PrivateRoute>} />
-                <Route path="/settings"    element={<PrivateRoute><PlaceholderPage title="Settings" icon="⚙️" /></PrivateRoute>} />
-                <Route path="/help"        element={<PrivateRoute><PlaceholderPage title="Help & Support" icon="💬" /></PrivateRoute>} />
+                <Route path="/settings"    element={<PrivateRoute><SettingsPage /></PrivateRoute>} />
+                <Route path="/help"        element={<PrivateRoute><HelpPage /></PrivateRoute>} />
                 <Route path="/profile"     element={<PrivateRoute><PlaceholderPage title="Profile" icon="👤" /></PrivateRoute>} />
+
+                {/* Assessments */}
+                <Route path="/coding-assessment/:id" element={<PrivateRoute><CodingAssessmentPage /></PrivateRoute>} />
 
                 {/* Legacy exam */}
                 <Route path="/exam/create"      element={<PrivateRoute><CreateExamPage /></PrivateRoute>} />
@@ -92,6 +102,9 @@ function AppRoutes() {
                 <Route path="/room/create"   element={<ExaminerRoute><CreateRoomPage /></ExaminerRoute>} />
                 <Route path="/my-drives"     element={<ExaminerRoute><MyDrivesPage /></ExaminerRoute>} />
                 <Route path="/drive/create"  element={<ExaminerRoute><CreateDrivePage /></ExaminerRoute>} />
+                <Route path="/proctoring"    element={<ExaminerRoute><LiveProctoringPage /></ExaminerRoute>} />
+                <Route path="/leaderboard"   element={<ExaminerRoute><LeaderboardPage /></ExaminerRoute>} />
+                <Route path="/results"       element={<ExaminerRoute><ResultsAnalyticsPage /></ExaminerRoute>} />
 
                 {/* Backward compat redirects */}
                 <Route path="/home"       element={<Navigate to="/dashboard" replace />} />

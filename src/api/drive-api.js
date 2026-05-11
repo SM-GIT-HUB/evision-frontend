@@ -57,3 +57,24 @@ export async function getDriveById(id) {
     const response = await api.get(`/drive/${id}`)
     return response.data
 }
+
+// ─── Assessment ───────────────────────────────────────────────────────────────
+export async function getAssessmentQuestions(driveId) {
+    const response = await api.get(`/drive/${driveId}/assessment-questions`)
+    return response.data
+}
+
+export async function runCode(driveId, data) {
+    const response = await api.post(`/drive/${driveId}/run-code`, data)
+    return response.data
+}
+
+export async function submitAssessment(driveId, answers) {
+    const response = await api.post(`/drive/${driveId}/submit-assessment`, { answers })
+    return response.data
+}
+
+export async function terminateCandidate(driveId, candidateId) {
+    const response = await api.patch(`/drive/${driveId}/terminate-candidate/${candidateId}`)
+    return response.data
+}

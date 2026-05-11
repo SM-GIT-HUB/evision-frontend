@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { NavLink, useNavigate, useLocation } from "react-router-dom"
 import toast from "react-hot-toast"
-import { LayoutDashboard, Building2, Video, BarChart2, LogOut, ShieldCheck, Plus, Inbox, Trophy, Code2, CalendarDays, MessageSquare, Star, Settings, HelpCircle } from "lucide-react"
+import { LayoutDashboard, Building2, Video, BarChart2, LogOut, ShieldCheck, Plus, Inbox, Trophy, Code2, CalendarDays, MessageSquare, Star, Settings, HelpCircle, Activity, Lock as LockIcon } from "lucide-react"
 import useAuthStore from "../store/auth-store"
 import { logout } from "../api/auth-api"
 import { motion, AnimatePresence } from "motion/react"
@@ -10,8 +10,11 @@ import ClickSpark from "../bits/ClickSpark"
 const EXAMINER_NAV = [
     { to: "/dashboard",   label: "Dashboard",        icon: LayoutDashboard },
     { to: "/my-drives",   label: "Drive Management", icon: Building2 },
+    { to: "/proctoring",  label: "Live Proctoring",  icon: Activity },
     { to: "/interviews",  label: "Interviews",        icon: Video },
     { to: "/selection",   label: "Selection Board",   icon: BarChart2 },
+    { to: "/leaderboard", label: "Leaderboard",       icon: Trophy },
+    { to: "/results",     label: "Analytics",         icon: BarChart2 },
 ]
 
 const STUDENT_NAV = [
@@ -23,11 +26,18 @@ const STUDENT_NAV = [
     { to: "/messages",        label: "Messages",            icon: MessageSquare },
 ]
 
-const STUDENT_BOTTOM_NAV = [
-    { to: "/leaderboard",  label: "Leaderboard",  icon: Trophy },
-    { to: "/achievements", label: "Achievements", icon: Star },
+const COMMON_BOTTOM_NAV = [
     { to: "/help",         label: "Help & Support", icon: HelpCircle },
     { to: "/settings",     label: "Settings",     icon: Settings },
+]
+
+const STUDENT_BOTTOM_NAV = [
+    { to: "/achievements", label: "Achievements", icon: Star },
+    ...COMMON_BOTTOM_NAV
+]
+
+const EXAMINER_BOTTOM_NAV = [
+    ...COMMON_BOTTOM_NAV
 ]
 
 export default function Sidebar() {
@@ -36,7 +46,9 @@ export default function Sidebar() {
     const { user, setUser } = useAuthStore()
     const isExaminer = user?.role === "examiner"
     const navItems = isExaminer ? EXAMINER_NAV : STUDENT_NAV
-    const [open, setOpen] = useState(false)
+    const [isHovered, setIsHovered] = useState(false)
+    const [isLocked, setIsLocked] = useState(false)
+    const open = isHovered || isLocked
 
     async function handleLogout() {
         try {
@@ -56,8 +68,8 @@ export default function Sidebar() {
             initial={{ width: "80px" }}
             animate={{ width: open ? "260px" : "80px" }}
             transition={{ type: "spring", bounce: 0, duration: 0.4 }}
-            onMouseEnter={() => setOpen(true)}
-            onMouseLeave={() => setOpen(false)}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
             className="m-4 h-[calc(100vh-32px)] rounded-[2rem] bg-[#09090b] border border-white/10 flex flex-col relative z-50 shrink-0 overflow-hidden shadow-2xl"
         >
             {/* ── Logo Area ── */}
@@ -74,6 +86,14 @@ export default function Sidebar() {
                         EVision
                     </motion.span>
                 </div>
+                {open && (
+                    <button 
+                        onClick={() => setIsLocked(!isLocked)}
+                        className={`ml-auto p-1.5 rounded-lg border transition-colors ${isLocked ? "bg-white/10 border-white/20 text-white" : "border-transparent text-zinc-500 hover:text-white"}`}
+                    >
+                        <LockIcon size={14} />
+                    </button>
+                )}
             </div>
 
             {/* ── Examiner Quick Action ── */}
